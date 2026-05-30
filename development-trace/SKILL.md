@@ -1,6 +1,6 @@
 ---
 name: development-trace
-description: 为当前会话或当前 Git 工作区中的业务代码改动生成开发留痕文档。适用于用户要求“开发留痕”“生成 agent-works 文档”“按功能需求总结本次改动”“根据改动文件和开发计划输出实施记录”等场景；输出 Markdown 到项目根目录 ./agent-works/{feature-slug}/development-trace.md，按功能需求拆分，一项功能一个目录。
+description: 为当前会话或当前 Git 工作区中的业务代码改动生成开发留痕文档。适用于用户要求“开发留痕”“生成 agent-works 文档”“按功能需求总结本次改动”“根据改动文件和开发计划输出实施记录”等场景；输出 Markdown 到项目根目录 ./agent-works/{feature-slug}/development-trace.md，按功能需求拆分，一项功能一个目录，并优先复用同一功能已有的 agent-works 目录以保持 development-trace.md、business-audit.md 等文档归档一致。
 ---
 
 # Development Trace
@@ -24,7 +24,7 @@ description: 为当前会话或当前 Git 工作区中的业务代码改动生�
 1. 用户在当前会话提出的功能需求、补充说明和调整意见。
 2. 当前会话中实际新增或修改的业务文件。
 3. Git 工作区改动：`git status --short`、`git diff --stat`、必要时查看具体 `git diff -- <file>`。
-4. 项目已有需求和开发计划：外部查找 `./agent-works/` 目录，内部查找你自己的工作目录(~/.claude)下的可能相关的。
+4. 项目已有需求和开发计划：外部查找 `./agent-works/`目录，内部查找你自己的工作目录(~/.codex)下的可能相关的。
 5. 代码上下文：控制器、服务、Mapper、前端页面、组件、接口封装、路由、配置等与改动直接相关的文件。
 
 不要把未查看、未验证、无法从当前证据支撑的内容写成事实。
@@ -64,6 +64,15 @@ description: 为当前会话或当前 Git 工作区中的业务代码改动生�
 - 文档标题：中文功能需求名称。
 - `{feature-slug}`：功能需求英文名，使用小写 kebab-case，例如 `risk-level-map-export`。
 - 如果目标 `development-trace.md` 已存在，优先更新已有文件；更新时保留仍然准确的历史内容，删除或改写过期内容。
+- 同一功能需求下的 `development-trace.md`、`business-audit.md`、测试记录、复盘记录等文档，应复用同一个 `./agent-works/{feature-slug}/` 目录，不要为同一功能创建多个目录。
+
+slug 选择规则：
+
+1. 优先沿用已有 `agent-works` 目录、开发计划、业务核查文档或历史 `development-trace.md` 中已经使用的功能目录名。
+2. 若无既有目录，根据中文功能需求生成稳定英文 slug；无法稳定翻译时，先在留痕方案中给出建议 slug，等待用户确认。
+3. 不要每次为同一功能需求生成不同 slug；如果本次改动属于已有功能的延续，应更新原目录而不是新建目录。
+4. 不要使用过泛目录名，例如 `development-trace`、`feature-update`、`business-change`、`code-change`。
+5. 一个需求拆成多个独立功能时，每个功能使用独立 slug；多个文件共同完成同一业务能力时，共用一个 slug。
 
 必要时先创建 `agent-works` 及对应功能目录。
 

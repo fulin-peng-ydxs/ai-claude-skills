@@ -72,18 +72,22 @@ description: 自动代码开发技能：用于用户要求开发、修改、修�
 
 - 未新增或修改测试代码：
   - 编译整个项目：`bash ./agent/verify/scripts/java/mvn-compile.sh`
+  - 后端在子目录：`bash ./agent/verify/scripts/java/mvn-compile.sh -r 后端目录`
   - 编译指定模块：`bash ./agent/verify/scripts/java/mvn-compile.sh -m 模块名`
+  - 后端在子目录且指定模块：`bash ./agent/verify/scripts/java/mvn-compile.sh -r 后端目录 -m 模块名`
   - 清理再编译：`bash ./agent/verify/scripts/java/mvn-compile.sh --clean`
   - 指定 Maven settings：`bash ./agent/verify/scripts/java/mvn-compile.sh -s /path/to/settings.xml`
 - 已新增或修改测试代码：
   - 测试整个项目：`bash ./agent/verify/scripts/java/mvn-test.sh`
+  - 后端在子目录：`bash ./agent/verify/scripts/java/mvn-test.sh -r 后端目录`
   - 测试指定模块：`bash ./agent/verify/scripts/java/mvn-test.sh -m 模块名`
+  - 后端在子目录且指定模块：`bash ./agent/verify/scripts/java/mvn-test.sh -r 后端目录 -m 模块名`
   - 测试类：`bash ./agent/verify/scripts/java/mvn-test.sh -c 测试类名`
   - 测试方法：`bash ./agent/verify/scripts/java/mvn-test.sh -c 测试类名 --method 方法名`
   - 测试模块和方法：`bash ./agent/verify/scripts/java/mvn-test.sh -m 模块名 -c 测试类名 --method 方法名`
   - 指定 Maven settings：`bash ./agent/verify/scripts/java/mvn-test.sh -s /path/to/settings.xml`
 
-优先选择覆盖本次改动的最小充分脚本参数。多模块项目中能确定模块时优先带 `-m`；项目明确需要私服或特殊 Maven 配置时再带 `-s/--settings`，默认不要添加 settings 参数。
+优先选择覆盖本次改动的最小充分脚本参数。若项目根目录没有 `pom.xml`，或本次改动位于某个后端服务子目录，先带 `-r/--root` 指向该 Maven 项目目录；多模块项目中能确定模块时再带 `-m`；项目明确需要私服或特殊 Maven 配置时再带 `-s/--settings`，默认不要添加 settings 参数。
 
 ### 前端验证
 
@@ -94,6 +98,8 @@ node ./agent/verify/scripts/vue/ai-check.js [改动文件...]
 ```
 
 如果不传文件，脚本会自动读取 Git 工作区中的前端改动文件。默认只执行 lint/typecheck，不启动页面自动化，不要求 Playwright 或 token。
+
+前端目录由 `agent/verify/scripts/vue/ai-config.json` 的 `frontendDir` 决定。前后端放一起时，`frontendDir` 可以指向服务目录；前后端分开时，`frontendDir` 应指向实际前端目录。传入文件参数时使用相对项目根目录的文件路径，并确保文件位于 `frontendDir` 下。
 
 用户明确要求构建验证，或任务涉及打包、资源路径、环境变量、路由懒加载、构建配置时，追加 `--build`：
 
