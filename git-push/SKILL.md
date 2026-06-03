@@ -141,10 +141,16 @@ wf.更新_AJAX 示例：axios.html-fetch.html-原生 AJAX 请求封装
 
   请确认：
   1. 文件清单正确，继续 commit
-  2. 文件清单有误，需要修正
+  2. 文件清单正确，直接 commit 并 push
+  3. 文件清单有误，需要修正
   ```
 
 - 只有用户确认 staged 文件清单正确后，才能继续执行 `git commit`。
+- 如果用户选择“文件清单正确，直接 commit 并 push”，表示用户已同时确认当前 staged 文件清单、提交信息和推送动作；后续直接进入 `git commit` → `git push`，不再重复询问提交方式或 push 前确认。
+- 用户选择“直接 commit 并 push”后，必须锁定当前 staged 清单：
+  - 不得再执行任何 `git add`、`git add -A`、`git add .` 或其它会改变 staged 范围的命令。
+  - `git commit` 前必须重新运行 `git diff --cached --name-status`，与刚才展示给用户确认的 staged 清单逐项对比。
+  - 如果 staged 清单发生变化，必须中止直接提交推送流程，重新展示 staged 清单并让用户确认。
 
 ## 4. 确认提交方式并执行
 
@@ -167,6 +173,7 @@ wf.更新_AJAX 示例：axios.html-fetch.html-原生 AJAX 请求封装
 - 如果用户选择 1，则执行 `git commit` 后停止。
 - 如果用户选择 2，则执行 `git commit`，成功后再执行 `git push`。
 - 如果用户选择 3，则按用户说明执行。
+- 如果用户已在 3.3 选择“文件清单正确，直接 commit 并 push”，则跳过本节提交方式确认，按 3.3 的锁定 staged 清单规则执行 `git commit`，成功后直接执行 `git push`。
 
 ### 4.3 push 前确认
 
@@ -178,6 +185,7 @@ wf.更新_AJAX 示例：axios.html-fetch.html-原生 AJAX 请求封装
   确认要执行 git push 吗？(yes/no)
   ```
 - 只有用户明确确认后，才能执行 `git push`。
+- 如果用户已在 3.3 选择“文件清单正确，直接 commit 并 push”，本节 push 前确认视为已由 3.3 完成；不得再次改动 staged 范围，只能推送刚刚创建的 commit。
 
 ## 5. 执行顺序（固定）
 
@@ -188,9 +196,10 @@ wf.更新_AJAX 示例：axios.html-fetch.html-原生 AJAX 请求封装
 3. 读取确认范围内的 diff 摘要，生成提交信息并通过 `AskUserQuestion` 确认
 4. 按确认范围执行 `git add`
 5. 展示 staged 文件清单并通过 `AskUserQuestion` 确认
-6. 通过 `AskUserQuestion` 确认提交方式
-7. 执行 `git commit`
-8. 若用户选择 push，则通过 `AskUserQuestion` 再次确认后执行 `git push`
+6. 如果用户在 staged 确认中选择“直接 commit 并 push”，重新校验 staged 清单未变化后执行 `git commit` → `git push`
+7. 否则，通过 `AskUserQuestion` 确认提交方式
+8. 执行 `git commit`
+9. 若用户选择 push，则通过 `AskUserQuestion` 再次确认后执行 `git push`
 
 ## 6. 注意事项
 
@@ -201,7 +210,7 @@ wf.更新_AJAX 示例：axios.html-fetch.html-原生 AJAX 请求封装
 - 单行提交信息尽量不超过 100 个字符；如超过，应优先压缩“具体内容”，必要时拆成多行。
 - 多文件提交时，优先按功能聚合，避免罗列所有文件名。
 - 若无法从 diff 中推断业务含义，应先询问用户补充，不要编造需求来源或业务目的。
-- 只有在用户明确选择“提交并推送”且 push 前再次确认后，才执行 `git push`。
+- 只有在用户明确选择“提交并推送”且 push 前再次确认后，才执行 `git push`；或用户在 3.3 staged 最终确认中明确选择“文件清单正确，直接 commit 并 push”后，才可跳过后续重复确认并直接推送刚刚创建的 commit。
 
 ## 7. 安全红线
 
@@ -213,5 +222,6 @@ wf.更新_AJAX 示例：axios.html-fetch.html-原生 AJAX 请求封装
 4. 跳过 staged 文件确认步骤直接 commit
 5. 在未得到用户明确确认的情况下执行 git push
 6. 使用纯文本提问替代 `AskUserQuestion` 弹窗（违反第 0 章约束）
+7. 用户选择“直接 commit 并 push”后再次执行 `git add` 或提交与最终 staged 确认不一致的文件
 
 历史教训：2026-04-07 设备离线预警功能推送时，因违反上述规则，导致单个提交包含 40337 个文件、890 万行改动，用户被迫回退。
