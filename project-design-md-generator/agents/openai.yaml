@@ -1,0 +1,4 @@
+interface:
+  display_name: "生成项目 DESIGN.md"
+  short_description: "扫描当前项目前端并生成项目专属 DESIGN.md"
+  default_prompt: "根据当前项目现有前端实现生成项目专属 DESIGN.md。请使用技能内置的固定结构和审查规则，先分析页面、组件、样式、主题和设计 token；如果前端不统一或缺少关键规范，先给出补齐建议并等待确认，再创建或更新项目根目录的 DESIGN.md。"
