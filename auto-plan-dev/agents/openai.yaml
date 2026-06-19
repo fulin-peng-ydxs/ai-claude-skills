@@ -1,0 +1,4 @@
+interface:
+  display_name: "开发计划生成器"
+  short_description: "根据需求文档生成可执行开发计划"
+  default_prompt: "Use $auto-plan-dev to generate an implementation plan from a confirmed requirement document."
