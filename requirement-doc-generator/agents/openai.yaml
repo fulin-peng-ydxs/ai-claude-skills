@@ -1,0 +1,6 @@
+interface:
+  display_name: "需求文档生成器"
+  short_description: "生成可指导AI开发计划的项目化需求文档和确认清单流程"
+  default_prompt: "使用 $requirement-doc-generator 根据我的初步需求澄清功能并生成 ./agent-works/{feature}/requirement.md。"
+policy:
+  allow_implicit_invocation: true
