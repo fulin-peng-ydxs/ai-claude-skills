@@ -12,6 +12,7 @@
 
 | 技能目录 | 主要用途 |
 | --- | --- |
+| `ai-instruction-simplifier` | 精简、重构并规范 AI 约束文档、技能说明和自动化规则，保留稳定执行约束与最新事实。 |
 | `auto-plan-dev` | 仅在用户显式点名时，把已确认需求文档或功能需求生成为带需求映射、任务追踪和页面技术实现约束的开发计划。 |
 | `business-feature-audit` | 对当前改动做业务闭环核查，检查流程、状态、权限、上下游协同和数据一致性。 |
 | `development-trace` | 为当前需求生成开发留痕文档，沉淀需求目标、实现过程和结果。 |
@@ -20,7 +21,8 @@
 | `git-push` | 从确认文件范围、生成提交信息，到执行 `git add`、`git commit`、`git push` 的完整提交流程。 |
 | `process-usage-report` | 分析当前电脑进程使用情况，输出结构化资源占用报告。 |
 | `project-design-md-generator` | 为前端项目生成或更新 `DESIGN.md`，沉淀 UI 规范和设计约束。 |
-| `requirement-doc-generator` | 生成带稳定需求编号、页面与交互功能点约束的项目化需求文档，用于支撑后续开发计划。 |
+| `requirement-closure-designer` | 先补全需求的完整业务闭环、页面入口与落地链路，再决定是否进入正式需求文档生成。 |
+| `requirement-doc-generator` | 基于已确认需求闭环和项目现状，生成带稳定需求编号与页面交互约束的正式 `requirement.md`。 |
 | `setup-dm-mcp` | 为当前项目注册达梦数据库 MCP 服务，并写入项目与 Claude 所需配置。 |
 | `setup-redis-mcp` | 为当前项目复用或创建 Redis MCP 服务，并补齐连接配置与授权设置。 |
 | `setup-taos-mcp` | 为当前项目复用或创建 TDengine（TaoS）MCP 服务，并补齐连接配置与授权设置。 |
@@ -28,7 +30,7 @@
 ## 使用方式
 
 1. 在会话中直接描述需求，命中技能适用场景时，Claude 会按技能说明执行。
-2. 如果要明确触发某个技能，可以直接提到技能目录名或对应任务名称；带显式调用约束的技能，只有在用户明确点名后才可使用。
+2. 如果要明确触发某个技能，可以直接提到技能目录名或对应任务名称；带显式调用约束的技能，只有在用户明确点名后才可使用。需求分析场景可先用 `requirement-closure-designer` 补齐闭环，再用 `requirement-doc-generator` 落正式文档。
 3. 使用前优先查看目标目录的 `SKILL.md`，确认输入要求、执行流程、输出格式和安全边界。
 4. 新增技能时，至少创建 `技能目录/SKILL.md`，写清技能名称、适用场景、步骤、限制和交付物。
 
