@@ -1,0 +1,4 @@
+interface:
+  display_name: "项目 README 生成器"
+  short_description: "生成并校验项目 README 文档入口"
+  default_prompt: "使用 $project-readme-generator 基于当前项目事实生成或优化 README.md。"

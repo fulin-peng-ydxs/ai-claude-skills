@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI 约束文档生成器"
+  short_description: "生成并验证 AGENTS.md 与 CLAUDE.md"
+  default_prompt: "使用 $ai-constraint-doc-generator 在验证真实命令后生成项目 AGENTS.md 和 CLAUDE.md。"

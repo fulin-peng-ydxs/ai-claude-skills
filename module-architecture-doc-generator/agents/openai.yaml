@@ -1,0 +1,4 @@
+interface:
+  display_name: "模块架构文档生成器"
+  short_description: "按项目模块生成并校验架构设计文档"
+  default_prompt: "使用 $module-architecture-doc-generator 分析当前项目并按模块生成架构设计文档。"
