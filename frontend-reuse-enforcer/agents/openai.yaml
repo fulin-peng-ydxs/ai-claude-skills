@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend Reuse Enforcer"
+  short_description: "前端开发时强制复用优先，治理重复实现和抽象边界风险"
+  default_prompt: "Use $frontend-reuse-enforcer to enforce reuse-first frontend development and prevent repeated UI, state, table, form, and styling implementations."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Compliance Audit"
+  short_description: "依据项目 DESIGN 文档审查前端改动合规性和维护闭环"
+  default_prompt: "Use $design-compliance-audit to verify frontend changes against the project's DESIGN documentation and required maintenance checklist."

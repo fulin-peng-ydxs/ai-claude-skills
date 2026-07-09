@@ -1,0 +1,4 @@
+interface:
+  display_name: "Page UX Audit"
+  short_description: "审查页面视觉统一性、交互直观性、冗余控件与细节质量"
+  default_prompt: "Use $page-ux-audit to audit the current project's pages for visual consistency, interaction clarity, redundant controls, and UI polish."
