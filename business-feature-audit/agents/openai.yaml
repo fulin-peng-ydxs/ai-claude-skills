@@ -1,0 +1,4 @@
+interface:
+  display_name: "业务功能核查"
+  short_description: "核查本次开发在整体业务链路上的合理性"
+  default_prompt: "请基于当前会话、Git 改动和相关代码上下文，对本次开发做整体业务功能核查。若业务模块已明确，以该模块为边界；若未明确，先从改动中反推候选模块并标记为待确认。先输出业务风险结论；只有在我确认模块、范围和目录名后，才写入或更新 ./agent-works/{feature-slug}/business-audit.md。"
