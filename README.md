@@ -14,7 +14,6 @@
 | --- | --- |
 | `ai-constraint-doc-generator` | 基于仓库真实文件与实际命令验证，生成或重构项目级 `AGENTS.md`、`CLAUDE.md` 等 AI 协作约束文档。 |
 | `ai-instruction-simplifier` | 精简、重构并规范 AI 约束文档、`DESIGN.md`、技能说明和自动化规则，保留稳定执行约束与最新事实。 |
-| `auto-plan-dev` | 仅在用户显式点名时，把已确认需求文档或功能需求生成为带需求映射、原型承接、建议项状态跟踪、页面技术实现和组件资产闭环的开发计划。 |
 | `business-feature-audit` | 对当前改动做业务闭环核查，检查流程、状态、权限、上下游协同和数据一致性；页面体验、DESIGN 合规与前端复用问题分别交给专门审查技能。 |
 | `design-compliance-audit` | 先审查项目 `DESIGN.md` 等设计事实源是否完整且符合项目事实，再检查前端页面、组件、布局、样式、配置字段和维护闭环是否合规。 |
 | `development-trace` | 为当前需求生成开发留痕文档，沉淀需求目标、实现过程和结果。 |
