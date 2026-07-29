@@ -3,21 +3,17 @@ set -euo pipefail
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="$BASE_DIR/build/classes"
-TAOS_JDBC_JAR="${TAOS_JDBC_JAR:-}"
-HTTPCLIENT_JAR="${HTTPCLIENT_JAR:-}"
-HTTPCORE_JAR="${HTTPCORE_JAR:-}"
-COMMONS_LOGGING_JAR="${COMMONS_LOGGING_JAR:-}"
-COMMONS_CODEC_JAR="${COMMONS_CODEC_JAR:-}"
-FASTJSON_JAR="${FASTJSON_JAR:-}"
-GUAVA_JAR="${GUAVA_JAR:-}"
-JAVA_WEBSOCKET_JAR="${JAVA_WEBSOCKET_JAR:-}"
 
-SECRETS_DIR="$HOME/.codex/secrets"
-if [ -d "$SECRETS_DIR" ]; then
-  for env_file in "$SECRETS_DIR"/*.env; do
-    [ -r "$env_file" ] && source "$env_file"
-  done
-fi
+# 连接参数（TAOS_MCP_HOST/PORT/DATABASE/USER/PASSWORD）由 MCP 注册环境（.mcp.json 的 env）提供。
+# 本脚本只负责定位 JDBC 依赖 JAR：默认取本地 Maven 仓库路径，可用同名环境变量覆盖。
+TAOS_JDBC_JAR="${TAOS_JDBC_JAR:-$HOME/.m2/repository/com/taosdata/jdbc/taos-jdbcdriver/3.2.7/taos-jdbcdriver-3.2.7.jar}"
+HTTPCLIENT_JAR="${HTTPCLIENT_JAR:-$HOME/.m2/repository/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar}"
+HTTPCORE_JAR="${HTTPCORE_JAR:-$HOME/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar}"
+COMMONS_LOGGING_JAR="${COMMONS_LOGGING_JAR:-$HOME/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar}"
+COMMONS_CODEC_JAR="${COMMONS_CODEC_JAR:-$HOME/.m2/repository/commons-codec/commons-codec/1.15/commons-codec-1.15.jar}"
+FASTJSON_JAR="${FASTJSON_JAR:-$HOME/.m2/repository/com/alibaba/fastjson/1.2.83/fastjson-1.2.83.jar}"
+GUAVA_JAR="${GUAVA_JAR:-$HOME/.m2/repository/com/google/guava/guava/32.1.3-jre/guava-32.1.3-jre.jar}"
+JAVA_WEBSOCKET_JAR="${JAVA_WEBSOCKET_JAR:-$HOME/.m2/repository/org/java-websocket/Java-WebSocket/1.5.4/Java-WebSocket-1.5.4.jar}"
 
 check_jar() {
   local var_name="$1"

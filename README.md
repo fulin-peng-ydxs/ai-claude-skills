@@ -27,9 +27,9 @@
 | `project-readme-generator` | 基于项目事实与实际命令验证，生成、重构或优化项目根目录 `README.md`。 |
 | `requirement-closure-designer` | 先补全需求的完整业务闭环、页面入口与落地链路；用户确认后保存闭环文档，再决定是否进入正式需求文档生成。 |
 | `requirement-doc-generator` | 基于已确认需求闭环和项目现状，生成带稳定需求编号、建议项处理状态、页面交互约束、通用前端能力诉求和必要 `prototypes/` 原型文件的正式 `requirement.md`。 |
-| `setup-dm-mcp` | 为当前项目注册达梦数据库 MCP 服务，并写入项目与 Claude 所需配置。 |
-| `setup-redis-mcp` | 为当前项目复用或创建 Redis MCP 服务，并补齐连接配置与授权设置。 |
-| `setup-taos-mcp` | 为当前项目复用或创建 TDengine（TaoS）MCP 服务，并补齐连接配置与授权设置。 |
+| `setup-dm-mcp` | 为当前项目复用或创建达梦数据库 MCP 服务，将连接参数写入 `.mcp.json` 的 `env`，同步授权并执行 `health_check` 验证。 |
+| `setup-redis-mcp` | 为当前项目复用或创建 Redis MCP 服务，将连接参数写入 `.mcp.json` 的 `env`，同步授权并执行 `health_check` 验证。 |
+| `setup-taos-mcp` | 为当前项目复用或创建 TDengine（TaoS）MCP 服务，将连接参数写入 `.mcp.json` 的 `env`，同步授权并执行 `health_check` 验证。 |
 
 ## 使用方式
 

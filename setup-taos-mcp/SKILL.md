@@ -1,11 +1,13 @@
 ---
 name: setup-taos-mcp
-description: 为当前项目注册 TDengine（TaoS）时序数据库 MCP 服务器。如项目已有 .codex-mcp/taos-db-mcp/run.sh 则直接复用；否则从技能模板自动创建完整实现（Java 源码 + run.sh）。同时创建 ~/.codex/secrets/taos-db.env 连接配置、写入 .mcp.json、更新 .claude/settings.json 免确认授权。适用于用户要求"注册 TDengine MCP"、"setup taos mcp"、"创建 taos 数据库 mcp"等场景。
+description: 为当前项目注册 TDengine（TaoS）时序数据库 MCP 服务器。如项目已有 .codex-mcp/taos-db-mcp/run.sh 则直接复用；否则从技能模板自动创建完整实现（Java 源码 + run.sh）。连接参数直接写入 .mcp.json 的 env（不使用 ~/.codex/secrets），并更新 .claude/settings.json 免确认授权、执行 health_check 连接验证。适用于用户要求"注册 TDengine MCP"、"setup taos mcp"、"创建 taos 数据库 mcp"等场景。
 ---
 
 # setup-taos-mcp
 
 为当前项目注册 TDengine（TaoS）时序数据库 MCP 服务器，支持全量创建和复用两种模式。
+
+**核心约定**：所有连接参数（host/port/database/user/password）直接写进项目 `.mcp.json` 的 `env` 字段，**不使用 `~/.codex/secrets/*.env`**。JDBC 依赖 JAR 由 run.sh 从本地 Maven 仓库按默认路径定位（可被同名环境变量覆盖）。
 
 ## 技能文件位置
 
@@ -32,7 +34,7 @@ ls "$(pwd)/.codex-mcp/taos-db-mcp/run.sh" 2>/dev/null && echo "FOUND" || echo "N
 
 ```bash
 mkdir -p "$(pwd)/.codex-mcp/taos-db-mcp/src/main/java/com/gzzn/mcp/taosdb"
-mkdir -p "$(pwd)/.codex-mcp/taos-db-mcp/build"
+mkdir -p "$(pwd)/.codex-mcp/taos-db-mcp/build/classes"
 ```
 
 #### 2.2 复制 Java 源码和 run.sh
@@ -49,18 +51,20 @@ chmod +x "$(pwd)/.codex-mcp/taos-db-mcp/run.sh"
 
 #### 2.3 定位所需依赖 JAR
 
-TDengine RESTful 驱动需要以下 JAR（从本地 Maven 仓库查找）：
+TDengine RESTful 驱动需要以下 JAR（从本地 Maven 仓库查找最高版本，排除 sources/javadoc）：
 
 ```bash
-find ~/.m2/repository/com/taosdata/jdbc/taos-jdbcdriver -name "taos-jdbcdriver-*.jar" | grep -v sources | grep -v javadoc | sort -V | tail -1
-find ~/.m2/repository/org/apache/httpcomponents/httpclient -name "httpclient-*.jar" | grep -v sources | sort -V | tail -1
-find ~/.m2/repository/org/apache/httpcomponents/httpcore -name "httpcore-*.jar" | grep -v sources | sort -V | tail -1
-find ~/.m2/repository/commons-logging/commons-logging -name "commons-logging-*.jar" | grep -v sources | sort -V | tail -1
-find ~/.m2/repository/commons-codec/commons-codec -name "commons-codec-*.jar" | grep -v sources | sort -V | tail -1
-find ~/.m2/repository/com/alibaba/fastjson -name "fastjson-*.jar" | grep -v sources | sort -V | tail -1
-find ~/.m2/repository/com/google/guava/guava -name "guava-*.jar" | grep -v sources | sort -V | tail -1
-find ~/.m2/repository/org/java-websocket -name "Java-WebSocket-*.jar" | grep -v sources | sort -V | tail -1
+find ~/.m2/repository/com/taosdata/jdbc/taos-jdbcdriver -name "taos-jdbcdriver-*.jar" 2>/dev/null | grep -vi sources | grep -vi javadoc | sort -V | tail -1
+find ~/.m2/repository/org/apache/httpcomponents/httpclient -name "httpclient-*.jar" 2>/dev/null | grep -vi sources | sort -V | tail -1
+find ~/.m2/repository/org/apache/httpcomponents/httpcore -name "httpcore-*.jar" 2>/dev/null | grep -vi sources | sort -V | tail -1
+find ~/.m2/repository/commons-logging/commons-logging -name "commons-logging-*.jar" 2>/dev/null | grep -vi sources | sort -V | tail -1
+find ~/.m2/repository/commons-codec/commons-codec -name "commons-codec-*.jar" 2>/dev/null | grep -vi sources | sort -V | tail -1
+find ~/.m2/repository/com/alibaba/fastjson -name "fastjson-*.jar" 2>/dev/null | grep -vi sources | grep -vi javadoc | sort -V | tail -1
+find ~/.m2/repository/com/google/guava/guava -name "guava-*.jar" 2>/dev/null | grep -vi sources | sort -V | tail -1
+find ~/.m2/repository/org/java-websocket -name "Java-WebSocket-*.jar" 2>/dev/null | grep -vi sources | sort -V | tail -1
 ```
+
+模板 run.sh 已内置这些 JAR 的默认路径；若你的版本不同，可在 `.mcp.json` 的 `env` 用同名变量（`TAOS_JDBC_JAR`、`HTTPCLIENT_JAR` 等）覆盖。
 
 如果某个 JAR 找不到，提示用户：
 - 该项目是否依赖 `com.taosdata.jdbc:taos-jdbcdriver`（在 pom.xml 中检查）
@@ -69,7 +73,7 @@ find ~/.m2/repository/org/java-websocket -name "Java-WebSocket-*.jar" | grep -v 
 #### 2.4 试编译验证
 
 ```bash
-TAOS_JAR=$(find ~/.m2/repository/com/taosdata/jdbc/taos-jdbcdriver -name "*.jar" | grep -v sources | sort -V | tail -1)
+TAOS_JAR=$(find ~/.m2/repository/com/taosdata/jdbc/taos-jdbcdriver -name "taos-jdbcdriver-*.jar" 2>/dev/null | grep -vi sources | grep -vi javadoc | sort -V | tail -1)
 BUILD_DIR="$(pwd)/.codex-mcp/taos-db-mcp/build/classes"
 mkdir -p "$BUILD_DIR"
 javac -encoding UTF-8 -cp "$TAOS_JAR" -d "$BUILD_DIR" \
@@ -89,59 +93,51 @@ basename "$(pwd)"
 
 ### 第四步：收集 TDengine 连接信息
 
-向用户询问以下连接参数（如果用户已在对话中提供则直接使用，不重复询问）：
+优先从项目配置自动读取；读不到再询问用户（若对话中已提供则直接用，不重复询问）。
+
+**自动读取 Spring Boot 配置的参考命令：**
+
+```bash
+grep -iE "jdbc:TAOS-RS://|username|password" \
+  "$(pwd)"/*/src/main/resources/bootstrap-pro.yml 2>/dev/null | head
+```
+
+从 `url: jdbc:TAOS-RS://<host>:<port>/<database>` 解析 host、port、database。
 
 | 参数 | 说明 | 示例 |
 |------|------|------|
-| `TAOS_MCP_HOST` | TDengine 服务器地址 | `8.138.127.55` |
-| `TAOS_MCP_PORT` | RESTful 端口（通常 6041 或自定义） | `18809` |
+| `TAOS_MCP_HOST` | TDengine 服务器地址 | `10.100.101.158` |
+| `TAOS_MCP_PORT` | RESTful 端口（通常 6041 或自定义） | `6041` |
 | `TAOS_MCP_DATABASE` | 默认数据库名 | `mytest` |
 | `TAOS_MCP_USER` | 用户名 | `root` |
 | `TAOS_MCP_PASSWORD` | 密码 | `taosdata` |
 | `TAOS_MCP_WRITABLE` | 是否允许写入（时序数据通常只读） | `false` |
 
-### 第五步：创建/更新 secrets 文件
+### 第五步：写入/更新 .mcp.json
 
-将连接配置写入 `~/.codex/secrets/taos-db.env`（如文件已存在则覆盖）：
-
-```bash
-mkdir -p ~/.codex/secrets
-cat > ~/.codex/secrets/taos-db.env << 'SECRETS_EOF'
-export TAOS_JDBC_JAR=<taos-jdbcdriver JAR 绝对路径>
-export HTTPCLIENT_JAR=<httpclient JAR 绝对路径>
-export HTTPCORE_JAR=<httpcore JAR 绝对路径>
-export COMMONS_LOGGING_JAR=<commons-logging JAR 绝对路径>
-export COMMONS_CODEC_JAR=<commons-codec JAR 绝对路径>
-export FASTJSON_JAR=<fastjson JAR 绝对路径>
-export GUAVA_JAR=<guava JAR 绝对路径>
-export JAVA_WEBSOCKET_JAR=<Java-WebSocket JAR 绝对路径>
-export TAOS_MCP_HOST=<host>
-export TAOS_MCP_PORT=<port>
-export TAOS_MCP_DATABASE=<database>
-export TAOS_MCP_USER=<user>
-export TAOS_MCP_PASSWORD_ENV=TAOS_MCP_PASSWORD
-export TAOS_MCP_PASSWORD=<password>
-export TAOS_MCP_WRITABLE=<true|false>
-SECRETS_EOF
-```
-
-用第二步找到的实际 JAR 路径和第四步收集的连接参数填入。
-
-### 第六步：写入/更新 .mcp.json
-
-读取现有 `.mcp.json`（如有），在 `mcpServers` 中添加/更新 `{前缀}-taos-database` 条目，**保留已有条目**：
+读取现有 `.mcp.json`（如有），在 `mcpServers` 中添加/更新 `{前缀}-taos-database` 条目，**保留已有条目**。**连接参数全部写进 `env`**：
 
 ```json
 {
   "mcpServers": {
     "{前缀}-taos-database": {
-      "command": "{项目绝对路径}/.codex-mcp/taos-db-mcp/run.sh"
+      "command": "{项目绝对路径}/.codex-mcp/taos-db-mcp/run.sh",
+      "env": {
+        "TAOS_MCP_HOST": "{host}",
+        "TAOS_MCP_PORT": "{port}",
+        "TAOS_MCP_DATABASE": "{database}",
+        "TAOS_MCP_USER": "{user}",
+        "TAOS_MCP_PASSWORD": "{password}",
+        "TAOS_MCP_WRITABLE": "false"
+      }
     }
   }
 }
 ```
 
-### 第七步：更新 .claude/settings.json 权限
+> 说明：`TaosDbMcpServer.java` 通过 `TAOS_MCP_PASSWORD_ENV`（默认 `TAOS_MCP_PASSWORD`）指定的变量读密码，`env` 直接放 `TAOS_MCP_PASSWORD` 即可。JAR 路径默认即可，无需写进 env；版本不同时再加 `TAOS_JDBC_JAR` 等覆盖。
+
+### 第六步：更新 .claude/settings.json 权限
 
 读取 `$(pwd)/.claude/settings.json`，在 `permissions.allow` 数组中添加（如不存在）：
 
@@ -151,31 +147,34 @@ SECRETS_EOF
 
 如果 `settings.json` 不存在，**不创建**，仅告知用户手动添加。
 
-### 第八步：连接验证
+### 第七步：连接验证
+
+用与 `.mcp.json` 相同的环境变量，直接驱动 run.sh 做一次 `health_check`：
 
 ```bash
-source ~/.codex/secrets/taos-db.env
-BUILD_DIR="$(pwd)/.codex-mcp/taos-db-mcp/build/classes"
-CLASSPATH="$TAOS_JDBC_JAR:$HTTPCLIENT_JAR:$HTTPCORE_JAR:$COMMONS_LOGGING_JAR:$COMMONS_CODEC_JAR:$FASTJSON_JAR:$GUAVA_JAR:$JAVA_WEBSOCKET_JAR"
-
-(echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'; sleep 0.5; \
- echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"health_check","arguments":{}}}'; sleep 4) | \
-  java -cp "$BUILD_DIR:$CLASSPATH" com.gzzn.mcp.taosdb.TaosDbMcpServer 2>&1
+{
+  printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"t","version":"1"}}}'
+  printf '%s\n' '{"jsonrpc":"2.0","method":"notifications/initialized"}'
+  printf '%s\n' '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"health_check","arguments":{}}}'
+  sleep 5
+} | TAOS_MCP_HOST="{host}" TAOS_MCP_PORT="{port}" TAOS_MCP_DATABASE="{database}" \
+    TAOS_MCP_USER="{user}" TAOS_MCP_PASSWORD="{password}" \
+    "$(pwd)/.codex-mcp/taos-db-mcp/run.sh" 2>&1 | tail -1
 ```
 
 成功输出示例：
 ```
-{"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"ok: connected to ..."}]}}
+{"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"ok: connected to host:6041/mytest"}]}}
 ```
 
-### 第九步：输出结果
+### 第八步：输出结果
 
 报告：
 - MCP 服务器名称（如 `aiot-taos-database`）
 - run.sh 路径
-- secrets 文件路径
 - 连接验证结果（成功/失败）
-- **提示用户重启 Claude Code 使 MCP 配置生效**
+- **提示用户重启 Claude Code（或 reconnect 该 MCP）使配置生效**
+- 提示：密码以明文存于 `.mcp.json`，若该文件纳入版本控制需注意泄露风险
 
 ---
 
@@ -195,14 +194,14 @@ CLASSPATH="$TAOS_JDBC_JAR:$HTTPCLIENT_JAR:$HTTPCORE_JAR:$COMMONS_LOGGING_JAR:$CO
 
 ## 常见问题
 
-**Q: 编译报 `NoClassDefFoundError`**  
-A: 缺少依赖 JAR。检查 secrets 文件中的 JAR 路径是否正确，运行第二步的 `find` 命令重新定位。
+**Q: 编译/运行报 `NoClassDefFoundError`**
+A: 缺少依赖 JAR。运行第二步的 `find` 命令重新定位；版本不同则在 `.mcp.json` 的 `env` 用 `TAOS_JDBC_JAR`/`HTTPCLIENT_JAR` 等覆盖。
 
-**Q: health_check 超时无响应**  
+**Q: health_check 超时无响应**
 A: TDengine RESTful 端口（通常 6041 或项目自定义端口）未开放，或服务未启动。确认 `TAOS_MCP_HOST:TAOS_MCP_PORT` 可访问。
 
-**Q: TDengine RESTful 端口是多少？**  
-A: 默认 6041；如服务器做了端口映射（如本项目用 18809），以实际映射端口为准。可从项目 `bootstrap-pro.yml` 中的 `jdbc:TAOS-RS://host:port/` 读取。
+**Q: TDengine RESTful 端口是多少？**
+A: 默认 6041；如服务器做了端口映射，以实际映射端口为准。可从项目 `bootstrap-pro.yml` 中的 `jdbc:TAOS-RS://host:port/` 读取。
 
-**Q: guava JAR 找不到**  
-A: 有多个版本时取最高版本。若完全没有，说明项目未引入 TDengine 驱动依赖，先在 pom.xml 中添加并执行 `mvn dependency:resolve`。
+**Q: guava/fastjson JAR 找不到**
+A: 有多个版本时取最高版本（注意排除 javadoc）。若完全没有，说明项目未引入 TDengine 驱动依赖，先在 pom.xml 中添加并执行 `mvn dependency:resolve`。
