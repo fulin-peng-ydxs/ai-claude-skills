@@ -6,16 +6,16 @@
 ## 使用统计
 
 - 语法点：22 个
-- 生词：42 个
-- 固定搭配/场景句：2 条
-- 易错点：4 条
-- 分类数：17 个（语法 5 + 生词 8 + 场景 1 + 易错 3）
+- 生词：49 个
+- 固定搭配/场景句：8 条
+- 易错点：5 条
+- 分类数：21 个（语法 5 + 生词 10 + 场景 3 + 易错 3）
 - 最近学习：2026-08-22
 
 ## 目录
 
 1. [一、语法](#一语法)（按"想表达什么"分 5 类）
-2. [二、生词本](#二生词本)（按词类分 8 组）
+2. [二、生词本](#二生词本)（按词类分 10 组）
 3. [三、固定搭配与场景句](#三固定搭配与场景句)（按场景分）
 4. [四、中英易错点](#四中英易错点)（按错误根源分）
 
@@ -34,7 +34,7 @@
 | 人称代词三格（Subject / Object / Possessive） | 做主语的用主格（I, he），做宾语的用宾格（me, him），表"谁的"用所有格（my, his） | 中文"我"到哪里都是"我"；英文主语宾语位置不同、形式也不同：I love him ／ He loves me | I like you. You like me. This is my book. | 1 |
 | 名词复数（-s / -es） | 两个以上加 -s（books）；s/x/ch/sh 结尾加 -es（boxes, watches） | 中文"三本书"的"书"不变；英文必须说 three books | two cups of coffee / three books / five boxes | 1 |
 | 名词所有格（'s） | 's 表示"谁的"：Tom's book = 汤姆的书 | 中文"的"是单独一个字；英文贴在名词尾巴上，还要分清 Tom's（书）和 Tom is（是） | my mom's phone / Tom's bag | 1 |
-| 冠词与可数/不可数名词（a / an / the） | 首次提到用 a/an（元音前用 an）；特指"那个"用 the；不可数名词（coffee）不能加 s，要加量词 a cup of | 中文没有"冠词"，容易漏 a/the；不可数名词的概念中文也没有 | a book / an apple / the book on the desk / a cup of coffee | 1 |
+| 冠词与可数/不可数名词（a / an / the） | 首次提到用 a/an（元音前用 an）；特指"那个"用 the；不可数名词（advice 等）不加 s，用 some / a piece of 表达数量 | 中文没有"冠词"，容易漏 a/the；不可数名词的概念中文也没有 | a book / an apple / some advice | 2 |
 
 ### 类 2：动作与时态（动词）
 
@@ -57,7 +57,7 @@
 | --- | --- | --- | --- | --- |
 | can / could（能；可以） | can + 原形 = 能、会；could + 原形 = 更客气（Could I...? = 我可以……吗？） | 中文"我可以……吗"只有一种说法；英文 Can I 随便、Could I 客气；后面必须跟动词原形 | I can swim. Could I have a cup of coffee, please? | 1 |
 | should / must（应该/必须） | should + 原形 = 应该（建议）；must + 原形 = 必须（要求） | 中文"应该/必须"永远不变；英文后永远跟原形，也不随主语变（He should go） | You should see a doctor. You must be quiet here. | 1 |
-| want to / need to（想/需要做） | want to + 原形 = 想做；need to + 原形 = 需要做（I want to go = 我想去） | 中文"我想去"只有三个字；英文 I want to go 的 to 不能省，也不能说 I want go | I want to go home. I need to buy some water. | 1 |
+| want to / need to（想/需要做） | want to + 原形 = 想做；need to + 原形 = 需要做（I want to go = 我想去） | 中文"我想去"只有三个字；英文 I want to go 的 to 不能省，也不能说 I want go | I want to go home. I need to buy some water. | 2 |
 | would like（I'd like：我想要） | I'd like + 名词/动词 = 我想要，比 I want 更客气，点餐购物常用 | 中文"我想要"没有礼貌等级；英文 I'd like（客气）和 I want（直接）语气不同 | I'd like a cup of tea. I'd like to pay. | 1 |
 | be going to（打算做） | be going to + 动词原形 = 打算/将要，比 will 更口语常用 | 中文"我打算买手机"动词不变；英文 be 和 to 都不能省 | I'm going to buy a phone. What are you going to do? | 1 |
 
@@ -120,6 +120,14 @@
 | a | 冠词 | 一个 | an（元音前）/ the（特指） | a book / an apple | 新学 |
 | the | 冠词 | 这个；那个（特指） | — | the book on the desk | 新学 |
 
+### 限定词
+
+> 说明：放在名词前说明"多少、哪些"：some 接不可数名词 = 一些（some advice）；接可数名词复数 = 几个（some books）。
+
+| 单词 | 词性 | 中文释义 | 常用变形 | 来源句 | 状态 |
+| --- | --- | --- | --- | --- | --- |
+| some | 限定词 | 一些；几个 | — | some advice | 新学 |
+
 ### 疑问词
 
 > 说明：疑问词用来问信息，永远放在问句最前面。6 个词覆盖了日常提问的全部类型：问东西、问人、问地点、问时间、问原因、问方式。
@@ -147,6 +155,15 @@
 | with | 介词 | 和；用 | — | with my friends | 新学 |
 | for | 介词 | 为；给 | — | for you | 新学 |
 | of | 介词 | ……的 | — | a cup of coffee | 新学 |
+| over | 介词 | 在……期间；在……上方；越过 | — | over the course of a year | 新学 |
+
+### 时间词
+
+> 说明：表示"什么时候"，常放句首或句尾；句首的 Now 常是"好了、那么"的过渡词。
+
+| 单词 | 词性 | 中文释义 | 常用变形 | 来源句 | 状态 |
+| --- | --- | --- | --- | --- | --- |
+| now | 副词 | 现在；（句首）好了，那么 | — | Now, I want to give you some advice. | 新学 |
 
 ### 连词
 
@@ -183,6 +200,10 @@
 | cup | 名词 | 杯子 | cups | 同上 | 新学 |
 | coffee | 名词 | 咖啡 | coffees（一般用单数） | 同上 | 新学 |
 | please | 副词 | 请（礼貌用语） | — | 同上 | 新学 |
+| opportunity | 名词 | 机会 | opportunities | I want to take this opportunity to give you some advice. | 新学 |
+| advice | 名词 | 建议（不可数名词） | 无复数 | I want to give you some advice. | 新学 |
+| course | 名词 | 过程；课程 | courses | of course / over the course of your life | 新学 |
+| life | 名词 | 生活；一生 | lives | in your life | 新学 |
 
 ## 三、固定搭配与场景句
 
@@ -196,6 +217,26 @@
 | --- | --- | --- | --- |
 | Could I have...? | 我可以要……吗？ | Could I have a cup of coffee, please? | 点餐、要东西的万能句，句尾加 please 更礼貌 |
 | a cup of... | 一杯…… | a cup of coffee / a glass of water | 不可数名词（coffee / water / tea）的量词 |
+
+### 建议
+
+> 说明：给别人建议时用的句子：正式场合先说"借此机会"，日常先问"能给你点建议吗"；advice 不可数。
+
+| 搭配/句型 | 中文意思 | 例句 | 用法提示 |
+| --- | --- | --- | --- |
+| take this opportunity to do... | 借此机会做某事 | I want to take this opportunity to give you some advice. | 正式发言、开场白常用；to 后跟动词原形 |
+| give someone some advice | 给某人一些建议 | I want to give you some advice. | advice 不可数：some advice，不说 an advice / advices |
+| Can I give you some advice? | 我能给你点建议吗？ | Can I give you some advice? | 给建议前先问一句，显得尊重、不唐突 |
+| Now, ...（句首） | 好了，那么……（转入正题） | Now, I want to give you some advice. | 不是"现在"的意思，是提醒对方"我要讲正事了" |
+| over the course of... | 在……过程中/期间 | Over the course of your life, you will meet many people. | 正式表达，演讲/建议开场用；日常口语说 in your life 更简单 |
+
+### 回应
+
+> 说明：回应别人时直接用的短句。"当然"是日常最高频的回应之一，简单说 Of course 就行。
+
+| 搭配/句型 | 中文意思 | 例句 | 用法提示 |
+| --- | --- | --- | --- |
+| Of course. | 当然。 | Can I help you? — Of course! | 回应同意、答应请求的万能短句 |
 
 ## 四、中英易错点
 
@@ -217,6 +258,7 @@
 | ❌ 错误说法 | ✅ 正确说法 | 原因 |
 | --- | --- | --- |
 | Could I having a coffee? | Could I have a cup of coffee? | Could 后面必须跟动词原形 have，不能跟 having；coffee 是不可数名词，要"一杯"用 a cup of |
+| I want to give you an advice. / I want to give you some advices. | I want to give you some advice. | advice 是不可数名词：不能加 an、不能加 s；"一条建议"要说 a piece of advice |
 
 ### 句子结构类
 
