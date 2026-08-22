@@ -31,6 +31,7 @@
 | `setup-dm-mcp` | 为当前项目复用或创建达梦数据库 MCP 服务，将连接参数写入 `.mcp.json` 的 `env`，同步授权并执行 `health_check` 验证。 |
 | `setup-redis-mcp` | 为当前项目复用或创建 Redis MCP 服务，将连接参数写入 `.mcp.json` 的 `env`，同步授权并执行 `health_check` 验证。 |
 | `setup-taos-mcp` | 为当前项目复用或创建 TDengine（TaoS）MCP 服务，将连接参数写入 `.mcp.json` 的 `env`，同步授权并执行 `health_check` 验证。 |
+| `english-daily-tutor` | 面向小学水平、以日常听说为目标的英文句子精讲：逐词释义（含常用变形）、语法讲解与中英对比差异、举一反三例句，并将新知识沉淀到技能目录下 `knowledge/english-knowledge.md`；支持"复习模式"出题回顾。 |
 
 ## 使用方式
 
