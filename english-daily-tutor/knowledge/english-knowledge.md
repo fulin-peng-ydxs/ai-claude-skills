@@ -5,11 +5,11 @@
 
 ## 使用统计
 
-- 语法点：22 个
-- 生词：49 个
-- 固定搭配/场景句：8 条
-- 易错点：5 条
-- 分类数：21 个（语法 5 + 生词 10 + 场景 3 + 易错 3）
+- 语法点：24 个
+- 生词：55 个
+- 固定搭配/场景句：9 条
+- 易错点：7 条
+- 分类数：23 个（语法 5 + 生词 11 + 场景 4 + 易错 3）
 - 最近学习：2026-08-22
 
 ## 目录
@@ -63,15 +63,42 @@
 
 ### 类 4：句子结构
 
-> 说明：这类语法讲句子的组装方式——疑问句怎么问、命令怎么下、怎么表达"有"、怎么假设、怎么请对方确认。说清楚"怎么问、怎么让人做事"全靠这一类。
+> 说明：这类语法讲句子的组装方式——怎么问、怎么让人做事、怎么连接两个部分、怎么表达"有"。按用途分 4 个子类。
+
+#### 问句与确认
+
+> 说明：提问和请对方确认：把 be/do/can/will 提前变成问句；句尾加 right?/OK? 请对方点头。
 
 | 语法点 | 规则（一句话） | ⚠️ 与中文差异 | 例句 | 遇到次数 |
 | --- | --- | --- | --- | --- |
 | 一般疑问句语序（Yes/No Questions） | 把 be / do / can / will 放到句首，句尾用问号 | 中文加"吗"字、语序不变；英文没有"吗"字，靠语序提问 | Are you a student? Do you like tea? Can you swim? | 1 |
-| 祈使句（Please / Let's / Don't） | 直接说动词原形：Sit down.；加 Please 更客气；Let's + 原形 = 我们……吧；Don't + 原形 = 别…… | 中文"请坐"不带主语，英文也是 Sit down 就行，不需要 you | Please sit down. Let's go. Don't worry. | 1 |
-| there is / there are（有……） | there is + 单数，there are + 复数 = 某处有某物 | 中文"有"不分单复数；英文 There is a park 和 There are two parks 必须分清 | There is a park near my home. There are two cups on the desk. | 1 |
-| if 条件句（If + 现在时, 主句） | if = 如果：If + 现在时, 主句（现在/将来） | 中文"如果下雨我就待在家"语序灵活；英文 if 从句在前时后面要加逗号 | If you need help, call me. If it rains, I stay home. | 1 |
 | 附加确认（..., right? / OK?） | 陈述句后加 right? 或 OK? 请对方确认 = "……对吧？" | 中文"对吧"和英文 right? 一样放句尾，位置习惯一致，很好掌握 | You like coffee, right? Let's meet at 8, OK? | 1 |
+
+#### 指令与祈使
+
+> 说明：直接说动词原形，让对方做或别做某事；加 Please 更客气。
+
+| 语法点 | 规则（一句话） | ⚠️ 与中文差异 | 例句 | 遇到次数 |
+| --- | --- | --- | --- | --- |
+| 祈使句（Please / Let's / Don't） | 直接说动词原形：Sit down.；加 Please 更客气；Let's + 原形 = 我们……吧；Don't + 原形 = 别…… | 中文"请坐"不带主语，英文也是 Sit down 就行，不需要 you | Please sit down. Let's go. Don't worry. | 1 |
+
+#### 表达"有"
+
+> 说明：there is/are 表示"某处有某物"，单数用 is、复数用 are。
+
+| 语法点 | 规则（一句话） | ⚠️ 与中文差异 | 例句 | 遇到次数 |
+| --- | --- | --- | --- | --- |
+| there is / there are（有……） | there is + 单数，there are + 复数 = 某处有某物 | 中文"有"不分单复数；英文 There is a park 和 There are two parks 必须分清 | There is a park near my home. There are two cups on the desk. | 1 |
+
+#### 连接两个部分（that / if）
+
+> 说明：用 that 或 if 把两个部分连起来：if 表"如果"；find that 表"发现"；that 修饰前面的名词，说明"是哪一个、什么样的"。
+
+| 语法点 | 规则（一句话） | ⚠️ 与中文差异 | 例句 | 遇到次数 |
+| --- | --- | --- | --- | --- |
+| if 条件句（If + 现在时, 主句） | if = 如果：If + 现在时, 主句（现在/将来） | 中文"如果下雨我就待在家"语序灵活；英文 if 从句在前时后面要加逗号 | If you need help, call me. If it rains, I stay home. | 1 |
+| find that + 句子（发现……） | find that 后接一句完整的话，表示"发现/觉得某个事实"；同样结构的还有 I think that... | 中文"我发现英语有趣"中间没有"那个"；英文必须用 that 连接，且 that 后必须是完整句子 | I find that English is interesting. I think that he is right. | 1 |
+| that 修饰名词（...that...） | that + 一句话放在名词后面，说明"是哪一个、什么样的"：things that you do not deserve = 你不应得的那些事；想再补充一条描述用 and that 并列 | 中文把修饰的话放在名词前（"你不应得的那些事"）；英文放在名词后面，语序相反 | This is the book that I bought. Things that you do not deserve and that are not always fair. | 2 |
 
 ### 类 5：修饰与量化
 
@@ -189,6 +216,14 @@
 | will | 情态动词 | 将要 | would | I will come tomorrow. | 新学 |
 | not | 副词 | 不（否定） | — | I am not a student. | 新学 |
 
+### 频率副词
+
+> 说明：表示"多久一次、有多经常"：always（总是）、never（从不）这类词，日常放动词前面（I always go...）。not always ＝ 不总是（部分否定）。
+
+| 单词 | 词性 | 中文释义 | 常用变形 | 来源句 | 状态 |
+| --- | --- | --- | --- | --- | --- |
+| always | 副词 | 总是；一直 | — | Things are not always fair. | 新学 |
+
 ### 已学词汇
 
 > 说明：这些词来自讲解过的具体句子，属于"实义词"（有具体含义的名词/动词等），以后学到新句子再逐步补充。
@@ -204,6 +239,11 @@
 | advice | 名词 | 建议（不可数名词） | 无复数 | I want to give you some advice. | 新学 |
 | course | 名词 | 过程；课程 | courses | of course / over the course of your life | 新学 |
 | life | 名词 | 生活；一生 | lives | in your life | 新学 |
+| find | 动词 | 发现；找到 | finds / found / finding | I find that English is interesting. | 新学 |
+| thing | 名词 | 事情；东西 | things（复数） | Things are not always fair. | 新学 |
+| fair | 形容词 | 公平的 | fairer / fairest | Things are not always fair. | 新学 |
+| happen | 动词 | 发生 | happens / happened / happening | Bad things happen to good people. | 新学 |
+| deserve | 动词 | 应得；值得 | deserves / deserved / deserving | You deserve it! | 新学 |
 
 ## 三、固定搭配与场景句
 
@@ -238,6 +278,15 @@
 | --- | --- | --- | --- |
 | Of course. | 当然。 | Can I help you? — Of course! | 回应同意、答应请求的万能短句 |
 
+### 闲聊
+
+> 说明：聊生活、聊感受、安慰别人时用的句子。核心思路：用 happen to 说"事发生在谁身上"，用 deserve 说"该不该承受"。
+
+| 搭配/句型 | 中文意思 | 例句 | 用法提示 |
+| --- | --- | --- | --- |
+| happen to sb | 发生在某人身上 | Bad things happen to good people. | happen 后必须用 to 接人，不能说 happen me |
+| deserve... | 应得；活该 | You deserve it! | 中性词：夸人（你应得的）或吐槽（你活该）都行，看语气 |
+
 ## 四、中英易错点
 
 > 总说明：易错点 = 中国人说英语最容易犯的错，每一条都来自中文习惯的干扰。按错误根源分组，每组先说明这类错误怎么来的，再列表格。
@@ -267,3 +316,5 @@
 | ❌ 错误说法 | ✅ 正确说法 | 原因 |
 | --- | --- | --- |
 | I could have a coffee? | Could I have a coffee? | 英文疑问句靠语序提问（把 could 提前），不靠"吗"字 |
+| Things are always not fair. | Things are not always fair. | not always ＝ 不总是（部分否定）；always not 意思是"总是不"，意思完全相反。想表达"并非总是公平"要把 not 放在 always 前 |
+| A bad thing happened me. | A bad thing happened to me. | happen 是不及物动词，不能直接接人，必须用 to 连接：happen to sb |
