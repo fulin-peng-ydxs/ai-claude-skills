@@ -1,0 +1,6 @@
+interface:
+  display_name: "五维股票分析"
+  short_description: "基于可追溯公开数据完成五维股票分析、评分与季报增量跟踪"
+  default_prompt: "Use $five-dim-stock-analysis to analyze this listed company with public evidence."
+policy:
+  allow_implicit_invocation: true

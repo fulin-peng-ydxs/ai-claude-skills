@@ -1,0 +1,4 @@
+interface:
+  display_name: "磁盘使用分析"
+  short_description: "分析磁盘空间占用、定位大文件并提供分级安全清理建议"
+  default_prompt: "使用 $disk-usage-report 分析当前电脑的磁盘占用并给出安全清理建议。"

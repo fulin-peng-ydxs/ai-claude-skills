@@ -1,4 +1,4 @@
-# DESIGN.md 固定输出模板
+# DESIGN.md 参考输出模板
 
 生成或更新项目 `DESIGN.md` 时使用本模板。占位内容必须替换为项目真实信息；无法确认的内容写入 `Known Gaps` 或先向用户确认。
 
@@ -139,5 +139,5 @@ components:
 - front matter 中的示例值必须替换为项目真实值；无法确认时不要保留示例值。
 - 项目缺少某类 token 时，先判断是否需要用户确认；不影响主体系的缺口可写入 `## 10. Known Gaps`。
 - 组件只写项目真实存在或用户确认要补齐的组件。
-- 不同项目之间必须保持 1-9 章节稳定，`## 10. Known Gaps` 可保留为空或写“暂无已确认缺口”。
+- 章节可按项目适配，无内容不建空章节；影响使用或验证的缺口必须说明，既有 token 和机器字段保持兼容。
 - 不要把 `Responsive Behavior` 合并进 `Layout Principles`，也不要把 `Agent Prompt Guide` 省略。

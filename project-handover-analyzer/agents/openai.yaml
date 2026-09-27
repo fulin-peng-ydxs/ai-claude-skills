@@ -1,0 +1,4 @@
+interface:
+  display_name: "项目接手分析器"
+  short_description: "从源码、配置和部署材料生成可复核的完整项目接手分析报告"
+  default_prompt: "使用 $project-handover-analyzer 全面分析当前项目，并按完整 14 章骨架生成便于快速接手的 Markdown 报告。"

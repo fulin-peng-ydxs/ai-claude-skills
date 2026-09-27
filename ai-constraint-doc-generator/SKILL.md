@@ -22,7 +22,8 @@ description: 生成或重构项目级 AI 通用约束文档，包括 AGENTS.md �
 
 2. 建立命令验证计划。
    - 运行 `scripts/detect_project_commands.py <repo-root>` 收集技术栈、清单文件、脚本和候选命令。
-   - 写文档结构前读取 `references/document-model.md`。
+   - 读取 `references/output-contract.md`，按适用最低内容和项目实际选择结构。
+   - 读取 `references/document-model.md`，按项目类型适配内容与结构。
    - 判断验证门禁前读取 `references/verification-gate.md`。
    - 只读取检测到的相关语言参考：`references/languages/` 下的 Python、Vue/Node、Java 等文件。
 
@@ -40,6 +41,7 @@ description: 生成或重构项目级 AI 通用约束文档，包括 AGENTS.md �
 5. 落地并自检。
    - 验证门禁通过后再写 `AGENTS.md` 和 `CLAUDE.md`。
    - 写完后重读文件，检查职责分离、链接有效性、命令准确性，以及是否误带样例项目内容。
+   - 运行 `scripts/validate_ai_constraint_docs.py <repo-root>`；默认使用 `--custom-structure` 检查通用结构，只有项目或用户明确采用脚本内置骨架时才省略该参数。外部固定契约另行逐项核对；脚本通过不能替代最低内容的语义复核。
    - 向用户汇报已写文件、已验证命令、未写入命令及原因。
 
 ## 文档边界
@@ -51,9 +53,11 @@ description: 生成或重构项目级 AI 通用约束文档，包括 AGENTS.md �
 
 ## 资源入口
 
-- `references/document-model.md`：目标文档结构、内容边界和薄入口模式。
+- `references/output-contract.md`：`AGENTS.md`、`CLAUDE.md` 的参考骨架、最低内容和更新规则；生成或重构时必须完整读取。
+- `references/document-model.md`：项目类型和条件内容在参考骨架中的适配方式。
 - `references/verification-gate.md`：命令验证门禁、失败处理和交互规则。
 - `references/languages/python.md`：Python、FastAPI、Django、pytest 等项目。
 - `references/languages/vue.md`：Vue、Vite、Node 包管理项目。
 - `references/languages/java.md`：Java、Maven、Gradle、Spring 项目。
 - `scripts/detect_project_commands.py`：候选命令扫描脚本。它只能辅助发现，不能替代实际执行验证。
+- `scripts/validate_ai_constraint_docs.py`：校验参考骨架、顺序、空章节、占位内容和 `CLAUDE.md` 薄入口边界。

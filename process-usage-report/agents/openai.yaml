@@ -1,0 +1,4 @@
+interface:
+  display_name: "进程资源分析"
+  short_description: "分析 CPU、内存与 IO 占用并定位电脑卡顿的主要进程"
+  default_prompt: "使用 $process-usage-report 分析当前电脑的进程资源占用并定位卡顿来源。"

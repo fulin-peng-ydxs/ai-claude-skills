@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent-Auto Commit Audit"
+  short_description: "审查修复 Agent-Auto 提交并列出引用依据"
+  default_prompt: "使用 $agent-auto-commit-audit 审查并修复最新 Agent-Auto 提交范围。"

@@ -56,5 +56,3 @@
 3. 如果用户未指定目录且项目没有现成架构目录，创建并使用 `agent-works/architecture/`。
 
 输出文件路径为 `<输出目录>/<module-slug>.md`。如果同一模块已有文档，更新已有文档原路径，不另建新文件。
-
-默认兜底路径是 `agent-works/architecture/`，模块架构文档输出到 `agent-works/architecture/{module-slug}.md`。

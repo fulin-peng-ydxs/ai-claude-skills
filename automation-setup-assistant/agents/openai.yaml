@@ -1,0 +1,4 @@
+interface:
+  display_name: "自动化任务配置助手"
+  short_description: "创建、精简、验证并排查 Codex 自动化配置"
+  default_prompt: "使用 $automation-setup-assistant 帮我设置一个 Codex 自动化任务。"

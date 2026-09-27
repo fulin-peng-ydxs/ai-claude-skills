@@ -16,17 +16,16 @@ description: 分析项目代码与现有文档后，按业务模块、平台模�
 1. 发现模块和事实源。
    - 读取 `README.md`、`AGENTS.md`、已有架构/设计/API/需求文档、主要源码目录、路由、服务、存储、前端页面、测试和配置。
    - 运行 `scripts/detect_architecture_modules.py <repo-root>` 收集候选模块、现有架构文档、API/服务/前端/测试入口。
-   - 输出目录按固定顺序决策：用户指定目录 > 项目已有架构目录 > `agent-works/architecture/`。没有现成架构目录时，创建并使用 `agent-works/architecture/`。
+   - 输出目录和文件名按 [模块发现规则](references/module-discovery.md#输出路径) 确定。
 
 2. 选择模块边界。
    - 读取 `references/module-discovery.md`。
    - 按业务闭环、用户入口、API/CLI 边界、数据所有权、平台能力或技术子系统划分模块。
    - 不把每个文件夹机械生成成一篇文档；也不把多个职责强行塞进一篇大文档。
 
-3. 生成文档结构。
-   - 读取 `references/architecture-doc-model.md`。
-   - 对每个模块按需要写：模块定位、核心技术、业务/系统架构、页面/接口/运维使用说明、业务流程、数据与权限、与其它模块关系、风险事项。
-   - 当前项目架构文档的可借鉴点是“核心技术 + 架构关系 + 使用说明 + 流程 + 风险”的组织方式，不是具体业务模块名称或领域规则。
+3. 确定文档结构。
+   - 读取 `references/output-contract.md`，按适用最低内容和项目实际选择结构。
+   - 读取 `references/architecture-doc-model.md`，按项目类型适配内容与结构。
 
 4. 验证事实。
    - 读取 `references/evidence-and-quality.md`。
@@ -36,6 +35,7 @@ description: 分析项目代码与现有文档后，按业务模块、平台模�
 5. 落地与索引。
    - 一项模块一篇文档，文件名使用稳定 kebab-case：`<output-dir>/<module-slug>.md`。
    - 有现有文档时优先更新原文件，不重复创建相同模块文档。
+   - 对每个输出文件运行 `scripts/validate_architecture_doc_structure.py <document-path>`；默认使用 `--custom-structure` 检查通用结构，只有项目或用户明确采用脚本内置骨架时才省略该参数。外部固定契约另行逐项核对；脚本通过不能替代最低内容的语义复核。
    - 同步需要的文档入口，例如 README 的文档索引或架构目录索引；不要复制全文。
    - 汇报写入文件的绝对路径、覆盖模块、证据来源和未覆盖风险。
 
@@ -49,6 +49,8 @@ description: 分析项目代码与现有文档后，按业务模块、平台模�
 ## 资源入口
 
 - `references/module-discovery.md`：模块识别和拆分规则。
-- `references/architecture-doc-model.md`：模块架构文档结构和条件章节。
+- `references/output-contract.md`：参考骨架、最低内容、内容归属和已有文档迁移规则；生成或重构时必须完整读取。
+- `references/architecture-doc-model.md`：不同模块类型在参考骨架中的内容适配方式。
 - `references/evidence-and-quality.md`：证据、去冗余、风险和落地检查。
 - `scripts/detect_architecture_modules.py`：项目模块候选扫描脚本，只辅助发现，不替代代码阅读。
+- `scripts/validate_architecture_doc_structure.py`：校验参考骨架、顺序、重复标题、空章节和占位内容。

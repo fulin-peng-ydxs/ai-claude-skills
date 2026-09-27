@@ -1,4 +1,6 @@
 interface:
   display_name: "开发留痕"
-  short_description: "按功能需求生成 agent-works 开发留痕文档"
-  default_prompt: "使用 $development-trace 根据当前会话、Git 改动、需求文档和开发计划，为本次业务代码改动生成开发留痕文档，并按功能需求输出到项目根目录 ./agent-works/。优先复用同一功能已有的 {feature-slug} 目录，确保 development-trace.md、business-audit.md 等文档归档一致；写入前先确认文件范围、功能拆分和目标路径。"
+  short_description: "生成含性能与安全落地证据的开发留痕文档"
+  default_prompt: "使用 $development-trace 根据当前会话、Git 改动、需求文档和开发计划，为本次业务代码改动生成开发留痕文档，按功能需求生成 development-trace.md，输出目录遵循全局协作规则；写入前先确认文件范围、功能拆分和目标路径。"
+policy:
+  allow_implicit_invocation: false

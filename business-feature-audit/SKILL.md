@@ -1,6 +1,6 @@
 ---
 name: business-feature-audit
-description: 对当前会话或当前 Git 工作区中本次开发涉及的代码做业务闭环核查，判断改动放回业务链路后是否成立，是否存在流程闭环、状态流转、上下游协同、权限、兼容性、数据一致性、异常处理、运营落地和前端业务承接遗漏；支持先基于 Git diff 和会话上下文输出快速业务风险结论，也支持在用户确认模块、范围和目录名后写入 `./agent-works/{feature-slug}/business-audit.md`。
+description: 对当前会话或当前 Git 工作区中本次开发涉及的代码做业务闭环核查，判断改动放回业务链路后是否成立，是否存在流程闭环、状态流转、上下游协同、权限、兼容性、数据一致性、异常处理、运营落地和前端业务承接遗漏；支持先基于 Git diff 和会话上下文输出快速业务风险结论，也支持在用户确认模块、范围和目录名后写入 `business-audit.md`。
 ---
 
 # Business Feature Audit
@@ -120,18 +120,8 @@ description: 对当前会话或当前 Git 工作区中本次开发涉及的代�
 
 ## 输出位置与命名
 
-正式产档时，统一输出到项目根目录下的功能目录：
-
-```text
-./agent-works/{feature-slug}/business-audit.md
-```
-
-规则：
-
-- 每个功能需求一个目录。
-- 目录内固定使用 `business-audit.md` 作为业务核查文档文件名。
+- 输出目录遵循全局协作规则 `~/ai-agent-config/config/force/collaboration-rule.md` 的“建文档目录时”；本技能文件名为 `business-audit.md`。
 - 文档标题使用中文业务功能名称。
-- `{feature-slug}` 使用小写 kebab-case，例如 `hazard-rectification-flow`。
 - 如果目标 `business-audit.md` 已存在，优先更新已有文件；更新时保留仍然准确的历史内容，删除或改写过期内容。
 - 不为同一功能创建多个同类核查文档。
 
@@ -166,7 +156,7 @@ description: 对当前会话或当前 Git 工作区中本次开发涉及的代�
 8. 结合 `references/audit-dimensions.md` 逐项核查合理性和遗漏风险，并标明证据强度。
 9. 快速核查模式：直接输出初步业务风险结论、已确认问题、待确认问题、无法确认风险和建议下一步。
 10. 正式产档模式：形成拟生成/更新方案，并按“确认流程”向用户确认。
-11. 用户确认后，生成或更新 `agent-works/{feature-slug}/business-audit.md`。
+11. 用户确认后，生成或更新目标目录中的 `business-audit.md`。
 12. 完成后汇报生成或更新的文档路径、覆盖的业务功能、主要证据来源、结论摘要和剩余盲区。
 
 ## 输出约束

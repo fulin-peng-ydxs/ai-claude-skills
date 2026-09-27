@@ -1,16 +1,16 @@
 # DESIGN.md 结构参考
 
-本文件定义 `DESIGN.md` 的固定结构。
+本文件定义 `DESIGN.md` 的参考结构。
 
 ## 基本要求
 
-- 顶部 YAML front matter 放 token
+- 新建模板在 YAML front matter 放 token；已有机器契约优先
 - 正文使用 `##` 分节
 - token 提供精确值，正文解释如何使用
 
 ## 内容结构
 
-最终输出以 `references/design-md-template.md` 为骨架。下面只说明必须覆盖的区块：
+新建文档参考 `references/design-md-template.md`；下列区块按项目适用性覆盖，既有机器契约优先：
 
 ```md
 ---
@@ -79,12 +79,12 @@ components:
 - 正文描述解释风格和使用边界，避免空话
 - 如果某些值是经确认后补全的，应保证与项目整体风格一致
 
-## 固定项与可变项
+## 内容契约与可变项
 
-固定项：
+内容契约：
 
-- 顶部 YAML front matter + 正文 Markdown 分层结构
-- 章节顺序固定为 `Visual Theme & Atmosphere` 到 `Agent Prompt Guide`，`Known Gaps` 作为第 10 章
+- 新文档默认使用 YAML token + Markdown；已有项目采用其他 token 事实源时引用其入口，不复制第二份数值
+- 模板章节作为信息检查项，标题和顺序可适配；已知缺口必须有明确承载位置
 - `colors`、`typography`、`rounded`、`spacing`、`components` 等常见 token 区块
 - token 颗粒度
 - 对组件和布局的描述方法
@@ -95,7 +95,7 @@ components:
 
 - 具体 token 命名，只要清晰稳定即可
 - 组件覆盖范围，可按项目实际复杂度裁剪
-- 已知缺口说明，统一写入 `## 10. Known Gaps`
+- 已知缺口说明，写入已有或适配后的缺口说明位置
 
 禁止项：
 

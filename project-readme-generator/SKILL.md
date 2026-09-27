@@ -18,10 +18,9 @@ description: 生成、重构或优化项目 README.md。用于用户要求创建
    - 运行 `scripts/detect_readme_facts.py <repo-root>` 收集候选事实、目录、清单、脚本、文档入口和命令线索。
    - 文档与代码冲突时，优先相信代码、脚本和机器可读配置。
 
-2. 选择 README 模型。
-   - 读取 `references/readme-model.md`。
-   - 根据项目类型、读者和复杂度选择章节模块，不固定套用某个项目的章节标题。
-   - 当前项目 README 的可复用点是“问题导向、闭环流程、模块入口、架构关系、命令分层、故障排查、文档索引”，不是具体业务内容。
+2. 确定输出结构。
+   - 读取 `references/output-contract.md`，按适用最低内容和项目实际选择结构。
+   - 读取 `references/readme-model.md`，按项目类型适配内容与结构。
 
 3. 建立并执行命令验证。
    - 读取 `references/command-verification.md`。
@@ -36,6 +35,7 @@ description: 生成、重构或优化项目 README.md。用于用户要求创建
 
 5. 自检并汇报。
    - 重读 `README.md` 检查链接、命令、目录、图表、表格和读者路径。
+   - 运行 `scripts/validate_readme_structure.py README.md`；默认使用 `--custom-structure` 检查通用结构，只有项目或用户明确采用脚本内置骨架时才省略该参数。外部固定契约另行逐项核对；脚本通过不能替代最低内容的语义复核。
    - 汇报写入文件、已验证命令、未写入命令及原因、残余风险。
 
 ## 文档边界
@@ -47,7 +47,9 @@ description: 生成、重构或优化项目 README.md。用于用户要求创建
 
 ## 资源入口
 
-- `references/readme-model.md`：README 模块选择、结构策略和当前项目可借鉴的通用写法。
+- `references/output-contract.md`：README 参考骨架、条件内容、最低内容和更新规则；生成或重构时必须完整读取。
+- `references/readme-model.md`：不同项目类型的内容适配方式。
 - `references/command-verification.md`：README 命令验证门禁和失败处理。
 - `references/content-quality.md`：内容质量、去冗余、链接和图表检查规则。
 - `scripts/detect_readme_facts.py`：候选事实扫描脚本。它只辅助发现，不替代人工判断和命令验证。
+- `scripts/validate_readme_structure.py`：校验参考骨架、顺序、重复标题、空章节和占位内容。
