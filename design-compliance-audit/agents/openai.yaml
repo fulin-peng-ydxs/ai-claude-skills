@@ -1,4 +1,4 @@
 interface:
-  display_name: "Design Compliance Audit"
+  display_name: "设计合规审核"
   short_description: "审查 DESIGN 文档质量、前端实现合规性和维护闭环"
   default_prompt: "Use $design-compliance-audit to audit the project's DESIGN documentation itself and verify frontend implementation compliance."

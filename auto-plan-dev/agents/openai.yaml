@@ -1,6 +1,0 @@
-interface:
-  display_name: "开发计划生成器"
-  short_description: "生成含性能与安全技术方案的可执行开发计划"
-  default_prompt: "Use $auto-plan-dev to generate an implementation plan from a confirmed requirement document."
-policy:
-  allow_implicit_invocation: false

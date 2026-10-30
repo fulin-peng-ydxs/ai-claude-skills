@@ -44,7 +44,7 @@ git remote get-url origin
 
 ### 1. 代码审查
 
-使用 `code-reviewer` 技能；如果当前环境提供等价的 `/code-review` 命令或技能，则按实际可用入口执行。审查真实实现、对应测试代码和相关上下文，不只看 diff。
+使用 `code-review` 技能；如果当前环境提供等价的 `/code-review` 命令或技能，则按实际可用入口执行。审查真实实现、对应测试代码和相关上下文，不只看 diff。
 
 重点检查：
 
@@ -85,8 +85,8 @@ git remote get-url origin
 
 适用时依次使用：
 
-1. `page-ux-audit`
-2. `frontend-reuse-enforcer`
+1. `frontend-ux-audit`
+2. `frontend-reuse-governance`
 3. `design-compliance-audit`
 
 对受影响路由执行浏览器自动化验证。优先使用项目指定的自动化端口和启动规则。至少检查主流程、可触达的空/加载/错误状态，以及受影响页面的响应式布局。

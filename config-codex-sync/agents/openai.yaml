@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex 配置同步"
+  short_description: "将 Codex 技能与协作说明同步到 Claude 和 Kimi"
+  default_prompt: "使用 $config-codex-sync 将 Codex 全局技能和协作说明同步到 Claude 与 Kimi。"

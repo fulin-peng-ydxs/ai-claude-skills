@@ -1,0 +1,4 @@
+interface:
+  display_name: "模块架构文档编写"
+  short_description: "按项目模块生成并校验架构设计文档"
+  default_prompt: "使用 $project-module-architecture-doc-authoring 分析当前项目并按适用最低内容与参考结构生成模块架构设计文档。"

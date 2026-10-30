@@ -3,7 +3,7 @@ name: business-feature-audit
 description: 对当前会话或当前 Git 工作区中本次开发涉及的代码做业务闭环核查，判断改动放回业务链路后是否成立，是否存在流程闭环、状态流转、上下游协同、权限、兼容性、数据一致性、异常处理、运营落地和前端业务承接遗漏；支持先基于 Git diff 和会话上下文输出快速业务风险结论，也支持在用户确认模块、范围和目录名后写入 `business-audit.md`。
 ---
 
-# Business Feature Audit
+# 业务功能闭环核查
 
 对本次开发涉及的代码做业务闭环核查。目标不是重复做普通代码审查，而是判断这次改动放回业务模块和完整链路后，整体功能是否成立，是否有未充分考虑的问题。
 
@@ -169,4 +169,4 @@ description: 对当前会话或当前 Git 工作区中本次开发涉及的代�
 - 未执行的验证、测试、联调或线上行为，不得写成“已确认”。
 - 当未发现明显问题时，也要写清剩余盲区和未覆盖范围。
 - 本技能不替代代码 review；如发现纯代码缺陷，可作为业务影响的补充证据，而不是输出主体。
-- 本技能不审查页面排版、颜色、动画、风格统一、DESIGN 遵循或前端复用治理；页面体验交给 `page-ux-audit`，DESIGN 合规交给 `design-compliance-audit`，前端重复实现和抽象边界交给 `frontend-reuse-enforcer`。
+- 本技能不审查页面排版、颜色、动画、风格统一、DESIGN 遵循或前端复用治理；页面体验交给 `frontend-ux-audit`，DESIGN 合规交给 `design-compliance-audit`，前端重复实现和抽象边界交给 `frontend-reuse-governance`。

@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI 指令精简与重构"
+  short_description: "精简并规范 AI 约束文档、项目指令文档和技能内容"
+  default_prompt: "Use $ai-instruction-refactoring to simplify this AI instruction document while preserving stable execution requirements."

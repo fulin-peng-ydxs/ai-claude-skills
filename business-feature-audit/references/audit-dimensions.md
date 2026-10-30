@@ -91,7 +91,7 @@
 - 用户是否能从页面感知业务状态变化、处理结果、异常原因和下一步动作。
 - 是否存在业务必须的页面入口、补偿入口、查看入口、处理入口或人工介入入口遗漏。
 - 是否出现前端认为成功，但后端实际未完整落地、状态未变化或下游未同步的情况。
-- 不审查排版、颜色、动画、风格统一、DESIGN 遵循和组件复用；这些问题分别交给 `page-ux-audit`、`design-compliance-audit`、`frontend-reuse-enforcer`。
+- 不审查排版、颜色、动画、风格统一、DESIGN 遵循和组件复用；这些问题分别交给 `frontend-ux-audit`、`design-compliance-audit`、`frontend-reuse-governance`。
 
 ## 问题分类规则
 
