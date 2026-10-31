@@ -44,6 +44,8 @@ description: 基于系统当前代码、配置与构建部署材料，生成或�
 
 ## 验证与完成标准
 
+文档校验器共用同级 `ai-constraint-doc-authoring/scripts/document_markdown.py` 解析 Markdown，专属字段与结构仍由各自校验器判断。安装或局部同步本技能时须同时提供该依赖；缺失时校验器明确报错，不回退到复制实现。
+
 - 每篇运行 `scripts/validate_architecture_doc_structure.py <document-path> --custom-structure`；只有明确采用内置模块骨架时省略参数，项目其他固定契约单独核对。技术解析标题不必强套“模块架构”。
 - 按输出契约复核适用内容，并沿代表性调用、配置生效或部署装配链路走读：能说明入口、机制、结果、边界和失败定位，不以图表或源码清单代替说明。
 - 回查关键事实、链接、锚点、依赖方向、表格和 Mermaid；静态确认与实际执行分开报告。未执行的命令、测试和线上行为不得称为验证通过。

@@ -1,130 +1,112 @@
-# Memory Risk Checklist
+# 内存风险检查清单
 
-This reference supports `backend-memory-risk-analysis`.
+本清单供 `backend-memory-risk-analysis` 分析后端潜在内存溢出（OOM）、内存泄漏或异常增长时使用，维护风险模式和检索线索；风险判定及报告要求由技能入口和报告模板维护。
 
-Use it when inspecting a backend codebase for potential OOM, memory leak, or abnormal memory growth risks.
+## 1. 基础问题
 
-## 1. Baseline Questions
+报告风险前先明确：
 
-Before reporting any risk, answer these:
+1. 后端使用什么运行时？
+2. 哪些组件在整个进程生命周期内存活？
+3. 哪些代码路径处理大数据集、大文件或高频请求？
+4. 哪些组件可能随时间持续积累数据？
 
-1. What runtime is this backend using?
-2. Which components live for the whole process lifetime?
-3. Which code paths handle large datasets, large files, or high-frequency traffic?
-4. Which components can accumulate data over time?
+## 2. Java / Spring 高风险模式
 
-## 2. High-Risk Java/Spring Patterns
+JVM 服务优先检查以下模式。
 
-Prioritize these patterns in JVM services:
+### 2.1 静态对象或单例持有
 
-### 2.1 Static Or Singleton Retention
+检查项：
 
-Check for:
+- 静态 `Map`、`List`、`Set`、数组或缓存容器。
+- 单例服务字段保存请求数据。
+- 没有容量限制的本地注册表或订阅容器。
+- 持续增长的会话或设备映射。
 
-- static `Map`, `List`, `Set`, array, cache holder
-- singleton service fields storing request data
-- unbounded local registries or subscription containers
-- ever-growing session or device maps
+典型风险：对象在整个 JVM 生命周期内保持强可达，无法回收。
 
-Typical risk:
+### 2.2 缓存增长
 
-- Objects remain strongly reachable for the whole JVM lifetime.
+检查项：
 
-### 2.2 Cache Growth
+- 未设置容量上限的内存缓存。
+- 以设备、会话、请求或区域标识为键，却没有淘汰机制的映射。
+- 同一数据的重复缓存。
+- 缓存大对象、大段 JSON 或 DTO 对象树。
 
-Check for:
+典型风险：真实流量下堆占用持续增长，无法回到基线。
 
-- in-memory caches without size limit
-- maps keyed by device id, session id, request id, or area id without eviction
-- duplicate caches for the same data
-- cached large objects, JSON blobs, or DTO trees
+### 2.3 ThreadLocal 泄漏
 
-Typical risk:
+检查项：
 
-- Heap keeps growing under real traffic and never returns to baseline.
+- 设置 `ThreadLocal` 值后没有移除。
+- 在线程局部变量中保存 MDC 等上下文数据。
+- 线程池复用线程时，旧值仍附着在线程上。
 
-### 2.3 ThreadLocal Leaks
+典型风险：长生命周期的池化线程持续持有请求级数据。
 
-Check for:
+### 2.4 调度与异步任务堆积
 
-- `ThreadLocal` values set but not removed
-- MDC-like data stored in thread locals
-- thread pools reusing threads while old values remain attached
+检查项：
 
-Typical risk:
+- `@Scheduled` 任务向长生命周期集合持续追加数据。
+- 没有淘汰机制的重试队列。
+- 缺乏背压控制的延迟任务或执行器队列。
+- 后台任务产生结果的速度超过消费速度。
 
-- Long-lived pooled threads retain request-scoped data.
+典型风险：堆占用逐渐增长，可能在长时间运行后才暴露。
 
-### 2.4 Scheduler And Async Accumulation
+### 2.5 监听器、MQ、MQTT 与 WebSocket 对象滞留
 
-Check for:
+检查项：
 
-- `@Scheduled` tasks appending to long-lived collections
-- retry queues without eviction
-- delayed tasks or executor queues without backpressure
-- background tasks producing results faster than they are consumed
+- 添加监听器后从未移除。
+- 持续增长的消费者注册表或回调映射。
+- MQTT 主题订阅关联的对象一直被引用。
+- WebSocket 或会话管理器保留失效会话。
 
-Typical risk:
+典型风险：断开连接或重新注册后，原连接相关对象仍未释放。
 
-- Heap growth is gradual and may only appear after long uptime.
+### 2.6 大查询与聚合加载
 
-### 2.5 Listener / MQ / MQTT / WebSocket Retention
+检查项：
 
-Check for:
+- 将整表加载到内存。
+- 分页或过滤前先创建大 `List`。
+- 重复执行 `collect(Collectors.toList())`。
+- 嵌套循环生成大量中间集合。
+- 导出前先在内存中组装完整的大数据集。
 
-- listeners added but never removed
-- consumer registries or callback maps that grow over time
-- MQTT topic subscriptions tied to objects that remain referenced
-- websocket/session managers with stale sessions
+典型风险：即使没有严格意义上的泄漏，短时内存峰值也可能导致 OOM。
 
-Typical risk:
+### 2.7 大缓冲与序列化路径
 
-- Connection-scoped objects remain retained after disconnect or re-register.
+检查项：
 
-### 2.6 Large Query Or Aggregation Loads
+- 使用 `ByteArrayOutputStream` 缓存大量数据。
+- 完全在内存中生成 Excel 或 CSV。
+- 大 JSON 序列化及重复对象复制。
+- 高频路径反复创建大对象，或将同一载荷转换为多种内存表示。
+- 图片、流、二进制或遥测载荷的缓冲。
 
-Check for:
+典型风险：单个请求或批处理任务可能申请巨大的连续内存空间。
 
-- loading full tables into memory
-- large `List` creation before pagination or filtering
-- repeated `collect(Collectors.toList())`
-- nested loops materializing large intermediate collections
-- export logic assembling huge datasets before writing
+### 2.8 资源泄漏
 
-Typical risk:
+检查项：
 
-- Short-lived spikes cause OOM even without a strict leak.
+- 流未关闭。
+- HTTP 响应或响应体未释放。
+- 数据库或驱动资源的持有时间超过实际需要。
+- 文件处理缺少缓冲容量限制。
 
-### 2.7 Large Buffer / Serialization Paths
+典型风险：本地资源或占用堆内存的资源持续滞留，逐步增加内存压力。
 
-Check for:
+## 3. 建议检索词
 
-- `ByteArrayOutputStream`
-- in-memory Excel or CSV generation
-- large JSON serialization and repeated object copying
-- hot paths repeatedly creating large objects or converting the same payload through multiple in-memory forms
-- image, stream, binary, or telemetry payload buffering
-
-Typical risk:
-
-- A single request or batch task can allocate huge contiguous memory.
-
-### 2.8 Resource Leaks
-
-Check for:
-
-- streams not closed
-- HTTP responses or bodies not released
-- DB or driver resources retained longer than necessary
-- file-processing logic without bounded buffering
-
-Typical risk:
-
-- Retained native or heap-backed resources increase memory pressure over time.
-
-## 3. Suggested Search Patterns
-
-Useful search patterns for Java/Spring projects:
+Java / Spring 项目可使用以下检索词；这些是代码标识，保留原文：
 
 - `static `
 - `ThreadLocal`
@@ -154,6 +136,7 @@ Useful search patterns for Java/Spring projects:
 - `EasyExcel`
 - `subList`
 
-## 4. Report Contract
 
-Use [the rating rules](../SKILL.md#第四步分级与判定) for risk levels and [SKILL.md](../SKILL.md) for evidence requirements, progress states, baseline handling and the output path. Read [the report template](output-template.md#内存风险报告) when generating the report; keep evidence, trigger conditions, impact, treatment and runtime verification together for each finding. This checklist defines risk patterns, not a second report or storage contract.
+## 4. 判定与报告入口
+
+风险等级、证据与处理状态使用 [风险与状态判定](../SKILL.md#风险与状态判定)；报告基线和保存路径使用 [技能入口](../SKILL.md)。生成报告时读取 [报告模板](output-template.md#内存风险报告)，将每项发现的证据、触发条件、影响、处置及运行时验证放在一起。本清单不另设报告或保存规则。

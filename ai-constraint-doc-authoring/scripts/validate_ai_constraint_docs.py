@@ -8,6 +8,13 @@ import re
 import sys
 from pathlib import Path
 
+# Resolve the shared parser relative to this installation, independent of cwd.
+_parser_dir = Path(__file__).resolve().parent
+if not (_parser_dir / "document_markdown.py").is_file():
+    raise SystemExit("Missing dependency: install ai-constraint-doc-authoring beside this skill.")
+sys.path.insert(0, str(_parser_dir))
+from document_markdown import fenced_lines, parse_sections, has_content, prose_without_fences
+
 
 AGENTS_SECTIONS = {
     "zh": [
@@ -46,64 +53,6 @@ SHELL_FENCE_RE = re.compile(
     r"^\s*```\s*(?:bash|sh|shell|zsh|fish|powershell|cmd)\b",
     re.MULTILINE | re.IGNORECASE,
 )
-
-
-def fenced_lines(text: str):
-    """Classify lines using matching fence characters and opening fence length."""
-    fence = ""
-    for line in text.splitlines():
-        if fence:
-            if re.fullmatch(r" {0,3}" + re.escape(fence[0]) + "{" + str(len(fence)) + r",}[ \t]*", line):
-                fence = ""
-                yield line, "marker"
-            else:
-                yield line, "code"
-            continue
-        opening = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
-        if opening and not (opening[1][0] == "`" and "`" in opening[2]):
-            fence = opening[1]
-            yield line, "marker"
-        else:
-            yield line, "prose"
-
-
-def parse_sections(text: str) -> tuple[list[str], list[tuple[str, str]]]:
-    h1: list[str] = []
-    sections: list[tuple[str, list[str]]] = []
-    current: list[str] | None = None
-    for line, kind in fenced_lines(text):
-        if kind != "prose":
-            if current is not None:
-                current.append(line)
-            continue
-
-        match = re.match(r"^(#{1,6})\s+(.+?)\s*$", line)
-        if match:
-            level = len(match.group(1))
-            title = match.group(2).strip().rstrip("#").strip()
-            if level == 1:
-                h1.append(title)
-            elif level == 2:
-                current = []
-                sections.append((title, current))
-            elif current is not None:
-                current.append(line)
-        elif current is not None:
-            current.append(line)
-
-    return h1, [(title, "\n".join(body).strip()) for title, body in sections]
-
-
-def has_content(body: str) -> bool:
-    return any(
-        line.strip() and (kind == "code" or not line.strip().startswith("#"))
-        for line, kind in fenced_lines(body)
-        if kind != "marker"
-    )
-
-
-def prose_without_fences(body: str) -> str:
-    return "\n".join(line for line, kind in fenced_lines(body) if kind == "prose")
 
 
 def detect_language(titles: list[str], contracts: dict[str, list[str]]) -> str | None:
