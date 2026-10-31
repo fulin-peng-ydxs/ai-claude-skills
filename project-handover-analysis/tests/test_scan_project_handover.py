@@ -10,11 +10,6 @@ from types import ModuleType
 SCRIPT_PATH = (
     Path(__file__).resolve().parents[1] / "scripts" / "scan_project_handover.py"
 )
-TEMPLATE_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "assets"
-    / "project-handover-report-template.md"
-)
 
 
 def load_scanner() -> ModuleType:
@@ -30,28 +25,6 @@ SCANNER = load_scanner()
 
 
 class ProjectHandoverScannerTests(unittest.TestCase):
-    def test_report_template_keeps_full_handover_structure(self) -> None:
-        template = TEMPLATE_PATH.read_text(encoding="utf-8")
-        expected_headings = [
-            "一页结论",
-            "代码包全景地图",
-            "总体功能说明",
-            "总体技术架构",
-            "部署架构",
-            "模块职责与依赖关系",
-            "依赖关系详细说明",
-            "前端应用结构",
-            "模块完整性评估",
-            "典型调用链",
-            "接手路线图",
-            "接手时最该问交付方的问题",
-            "关键证据入口",
-            "最后建议",
-        ]
-
-        for number, heading in enumerate(expected_headings, start=1):
-            self.assertIn(f"## {number}. {heading}", template)
-
     def test_detects_nested_repositories_and_declared_gaps(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

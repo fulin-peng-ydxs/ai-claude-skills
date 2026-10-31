@@ -27,13 +27,8 @@
 - 构建：按项目惯例使用 `./mvnw package`、`./mvnw verify` 或 `./gradlew build`
 - 本地启动：只有构建文件或文档确认后，才写 `./mvnw spring-boot:run`、`./gradlew bootRun`、生成 jar 命令或仓库脚本。
 
-## 写入文档
+## 技术栈特有记录
 
-记录：
-
-- 要求的 JDK 版本和本次实际 `java -version`。
-- Maven/Gradle wrapper 使用规则。
-- 已通过的测试和构建命令。
-- 服务 profile、端口、健康检查和停止命令，仅在验证通过后写入。
+落地前按 [输出契约](../output-contract.md#内容选择与表达) 区分长期规则与本次验证汇报，命令必须通过 [验证门禁](../verification-gate.md)。Java 项目补充仓库声明的 JDK 要求、Maven/Gradle wrapper 使用规则，以及经验证的服务 profile、端口与生命周期配置。
 
 除非仓库确实同时支持 Maven 和 Gradle，否则不要在文档中混写两套命令。

@@ -1,6 +1,6 @@
 interface:
   display_name: "开发计划与实施"
-  short_description: "生成含性能与安全技术方案的可执行开发计划"
-  default_prompt: "Use $development-workflow to generate an implementation plan from a confirmed requirement document."
+  short_description: "自动承接开发与计划请求，默认普通模式，支持专业模式和可追溯实施验证"
+  default_prompt: "使用 $development-workflow 生成开发计划，未指定时采用普通模式直接承接自然语言需求；涉及页面时先确认 HTML 或结构图原型选择，以需求总览、实施方案与任务、验收与交付组织内容，将现状依据就地关联方案，建立逐项可操作的验收与状态映射。"
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

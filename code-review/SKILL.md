@@ -1,73 +1,48 @@
 ---
 name: code-review
-description: Use this skill to review code. It supports both local changes (staged or working tree) and remote Pull Requests (by ID or URL). It focuses on correctness, maintainability, and adherence to project standards.
+description: 审查本地暂存、未暂存改动或指定远端 PR（编号或 URL），重点检查正确性、可维护性和项目规范遵循情况。只要求审查时输出反馈，不修改代码或发布远端评论。
 ---
 
 # 代码审查
 
-This skill guides the agent in conducting professional and thorough code reviews for both local development and remote Pull Requests.
+## 职责与边界
 
-## Workflow
+审查本地暂存、未暂存改动或指定远端 PR，判断正确性、可维护性及项目规范遵循情况。本文维护审查流程和反馈契约，项目规则与验证命令由仓库入口维护。只要求审查时不修改代码、不提交或发布评论；修复和外部发布需有对应授权。
 
-### 1. Determine Review Target
+## 输入与前置条件
 
-- **Remote PR**: If the user provides a PR number or URL (e.g., "Review PR #123"), target that remote PR.
-- **Local Changes**: If no specific PR is mentioned, or if the user asks to "review my changes", target the current local file system states (staged and unstaged changes).
+用户提供 PR 编号或 URL 时以该 PR 为范围；未指定 PR 或要求审查当前改动时，读取当前工作区与暂存区。先读取适用规范和改动背景，定位相关入口、消费方与测试。输入缺失到无法确定目标时，只询问必要信息。
 
-### 2. Preparation
+## 执行流程
 
-#### For Remote PRs:
+1. **准备范围**：本地使用 `git status`、`git diff` 和 `git diff --staged`；远端读取 PR 描述、差异和已有评论，理解目标与背景。优先只读审查；需要本地运行时可使用 `gh pr checkout <PR_NUMBER>`，但须先保护已有工作、记录原分支与工作区，不覆盖或擅自暂存用户改动。
+2. **选择验证**：检查仓库已有验证入口，运行与风险相关且获准的检查。只有项目实际定义时才使用 `npm run preflight`，不假定所有项目使用 Node。已有授权不重复询问；无法运行时继续静态审查并记录缺口。
+3. **深入分析**：沿改动及上下游核对下述维度，不能因预检查通过而跳过业务、边界或测试覆盖审查。
+4. **交付反馈**：按下述输出契约说明结论、可定位问题与验证限制，解释修改原因。
+5. **恢复现场**：若为审查临时切换了分支，在既有授权且可安全恢复时恢复原状态；有新改动或恢复风险时保留现场并说明，不默认切换到 main/master 或丢弃内容。
 
-1. **Checkout**: Use the GitHub CLI to checkout the PR.
+## 核心约束
 
-```bash
-gh pr checkout <PR_NUMBER>
-```
+- **正确性**：是否实现既定目的，是否有逻辑错误或行为回归。
+- **可维护性**：结构、模块边界、清晰度和既有设计模式是否适当。
+- **可读性**：命名、必要注释和格式是否遵守项目规则。
+- **效率**：是否引入性能瓶颈或资源浪费。
+- **安全性**：是否存在漏洞或不安全实践。
+- **异常与边界**：错误、空值、极端输入及失败路径是否处理完整。
+- **可测试性**：变更是否有有效覆盖，必要时给出能证明风险的补充用例。
 
-2. **Preflight**: Execute the project's standard verification suite to catch automated failures early.
+反馈保持专业、友善、可执行；解释问题的原因和影响。认可有证据的改进价值，不以礼貌措辞冲淡实质风险。
 
-```bash
-npm run preflight
-```
+## 产出边界与交付
 
-3. **Context**: Read the PR description and any existing comments to understand the goal and history.
+按 [文档结构与输出规范](~/ai-agent-config/config/force/document-output.md) 使用参考结构；组织遵循 [面向读者的组织与审阅](~/ai-agent-config/config/force/document-output.md#面向读者的组织与审阅)，以具体审查发现为单元，就近说明触发条件、位置与证据、影响和建议。默认在对话中交付，不自动创建报告文件或发送远端评论：
 
-#### For Local Changes:
+- 概要：审查范围与总体判断；首次形成完整报告时读取 [共用声明骨架](~/ai-agent-config/config/force/document-boundaries.md#共用声明骨架)，补明差异/版本与检查时点，说明本文维护本次代码审查发现和证据，业务需求、架构与实施结果沿用实际权威入口。
+- 发现：给出位置、证据、影响和建议；区分关键缺陷（错误、安全、破坏性变化）、改进建议（质量、性能）和可选细节（格式、风格），空类别可省略。
+- 结论：明确 Approved / Request Changes 或因验证缺口无法完成判定，列出重要的未验证项。审查未完成时不得暗示批准。
 
-1. **Identify Changes**:
-   - Check status: `git status`
-   - Read diffs: `git diff` (working tree) and/or `git diff --staged` (staged).
-2. **Preflight (Optional)**: If the changes are substantial, ask the user if they want to run `npm run preflight` before reviewing.
+要求保存报告时沿用确认内容；首次生成长期报告或获准补全时说明用途与内容归属，仅保存或局部更新不额外套版扩写。
 
-### 3. In-Depth Analysis
+## 验证与完成标准
 
-Analyze the code changes based on the following pillars:
-
-- **Correctness**: Does the code achieve its stated purpose without bugs or logical errors?
-- **Maintainability**: Is the code clean, well-structured, and easy to understand and modify in the future? Consider factors like code clarity, modularity, and adherence to established design patterns.
-- **Readability**: Is the code well-commented (where necessary) and consistently formatted according to our project's coding style guidelines?
-- **Efficiency**: Are there any obvious performance bottlenecks or resource inefficiencies introduced by the changes?
-- **Security**: Are there any potential security vulnerabilities or insecure coding practices?
-- **Edge Cases and Error Handling**: Does the code appropriately handle edge cases and potential errors?
-- **Testability**: Is the new or modified code adequately covered by tests (even if preflight checks pass)? Suggest additional test cases that would improve coverage or robustness.
-
-### 4. Provide Feedback
-
-#### Structure
-
-- **Summary**: A high-level overview of the review.
-- **Findings**:
-  - **Critical**: Bugs, security issues, or breaking changes.
-  - **Improvements**: Suggestions for better code quality or performance.
-  - **Nitpicks**: Formatting or minor style issues (optional).
-- **Conclusion**: Clear recommendation (Approved / Request Changes).
-
-#### Tone
-
-- Be constructive, professional, and friendly.
-- Explain *why* a change is requested.
-- For approvals, acknowledge the specific value of the contribution.
-
-### 5. Cleanup (Remote PRs only)
-
-After the review, ask the user if they want to switch back to the default branch (e.g., `main` or `master`).
+核对目标差异是否完整覆盖、问题是否有证据和准确位置、建议是否符合项目规则；分别说明实际执行的验证与静态推断。检查相关入口、消费方、异常和测试缺口，不能以无发现代替运行验证。临时切换或运行改变环境时，说明最终恢复状态。

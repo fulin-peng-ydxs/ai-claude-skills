@@ -1,0 +1,6 @@
+interface:
+  display_name: "页面原型设计"
+  short_description: "根据需求制作 HTML 交互原型或结构图原型，承接页面评审与开发交接"
+  default_prompt: "使用 $frontend-prototype-design 制作或更新页面原型，未明确形式时先询问 HTML 交互原型还是结构图原型，沿用项目规范并按所选形式验证。"
+policy:
+  allow_implicit_invocation: true

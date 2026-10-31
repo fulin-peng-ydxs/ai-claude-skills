@@ -1,4 +1,4 @@
 interface:
   display_name: "后端内存风险分析"
-  short_description: "分析后端内存风险并输出完整报告到 /doc，附处理进度状态"
-  default_prompt: "使用 $backend-memory-risk-analysis，分析当前项目后端中可能存在的内存溢出、内存泄漏和高内存占用风险。生成当天报告前，先读取 doc/check/memory 下最新的一份已有报告作为基线，更新其中已有风险的处理进度、等级、证据和建议；如果发现新的风险，再新增这部分内容。最终将完整结构化报告输出到项目路径下的 doc/check/memory/{日期}.md。"
+  short_description: "分析后端内存风险并延续已有报告，附证据、处理进度与复核建议"
+  default_prompt: "使用 $backend-memory-risk-analysis 分析当前项目后端内存风险。按技能的路径与基线选择规则查找并延续同范围已有报告，更新风险证据、等级和处理状态，补充新增风险及复核建议；无已有成果时使用默认目录。"

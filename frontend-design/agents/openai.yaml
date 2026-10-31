@@ -1,4 +1,4 @@
 interface:
   display_name: "前端设计"
-  short_description: "Create distinctive, production-grade frontend UI."
-  default_prompt: "Use $frontend-design to build a distinctive, production-grade frontend interface."
+  short_description: "为新建或局部修改界面提供符合产品任务、设备与既有设计系统的指导"
+  default_prompt: "使用 $frontend-design 在指定范围内设计或修改页面，遵循既有设计系统并按任务选择视觉与交互方案。"

@@ -24,13 +24,8 @@
 - 本地启动：优先使用根目录封装脚本；否则用 `dev` 脚本，并验证端口和清理方式。
 - 预览：只有文档会单独推荐生产预览时才验证。
 
-## 写入文档
+## 技术栈特有记录
 
-记录：
+落地前按 [输出契约](../output-contract.md#内容选择与表达) 区分长期规则与本次验证汇报，命令必须通过 [验证门禁](../verification-gate.md)。Vue / Node 项目补充 `.nvmrc`、`.node-version`、`engines`、`volta` 或 README 中的 Node 要求、包管理器与锁文件策略，以及经验证的开发服务器端口和代理行为。
 
-- `.nvmrc`、`.node-version`、`engines`、`volta` 或 README 中的 Node 要求，以及本次实际 `node --version`。
-- 包管理器和锁文件策略。
-- 已通过的测试和构建脚本。
-- 开发服务器命令、端口、代理行为、状态检查和停止命令，仅在验证通过后写入。
-
-不要因为 `package.json` 存在 `build` 脚本就写入 `npm run build`；它必须在当前仓库状态下通过。
+`package.json` 中存在脚本只是候选命令证据，不代表已验证可用。

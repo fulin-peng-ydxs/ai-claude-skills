@@ -15,34 +15,36 @@
 | `agent-auto-commit-audit` | 审查并修复指定 Git 项目中 Agent-Auto 提交范围内的代码、业务闭环、页面体验和相关文档。用于用户要求审查最近 Agent-Auto 提交、检查 AI 自动开发提交记录、按提交范围做代码 review、业务 review、页面审查、文档同步、自修复无业务歧义的问题、运行测试和浏览器自动化验证，并输出每个审查方向引用的约束规则文档或技能的场景。 |
 | `ai-constraint-doc-authoring` | 生成或重构项目级 AI 通用约束文档，包括 AGENTS.md 与 CLAUDE.md。用于用户要求创建、更新、模板化、精简或校准仓库 AI 协作说明、Claude Code 入口、Codex 约束文档，并要求基于真实项目事实验证环境、测试、构建、本地启动命令后再落地的场景。 |
 | `ai-instruction-refactoring` | 精简、重构和规范 AI 约束文档、项目指令文档、AGENTS.md、CLAUDE.md、DESIGN.md、AI 工具全局/项目级记忆文档、Codex/Claude skills、自动化规则和提示词规范。用于用户要求简化、去冗余、去历史流水账、合并职责边界、整理文档关系、压缩技能说明，且必须保留最新事实、稳定执行约束和核心业务规则的场景。 |
-| `investment-ai-trend-knowledge-maintenance` | 维护 AI 趋势投资知识源仓库。用于用户要求更新、审查、规范化、复盘或自动化维护 /Users/pengshuaifeng/ai-trend-analysis 中的 Markdown 知识库；也用于判断外部新闻、财报、研报、技术路线、资本开支、订单、产能和政策信息是否应进入 data-source，并同步 metadata、更新记录、候选池和校验闭环。 |
-| `development-workflow` | 仅当用户明确提出使用 development-workflow、$development-workflow 或“使用开发计划与实施技能”时，才根据需求文档、PRD、requirement.md 或已确认的功能需求生成可执行开发计划。即使用户要求“根据需求文档生成开发计划”“制定实施计划”“拆分开发任务”“输出 plan.md”“生成任务编排和进度追踪清单”，只要没有明确点名使用本技能，AI 也不得自动使用本技能。 |
-| `automation-management` | 用于创建、更新、精简和验证 Codex 自动化任务；也用于排查自动化执行失败、权限失败、网络失败、Git push 失败、定时任务未运行、提示词冗余或提示词职责边界不清等问题。 |
-| `backend-memory-risk-analysis` | 分析一个项目的后端，尤其是 Java/Spring 服务中可能存在的内存溢出、内存泄漏和异常内存增长风险，并输出完整结构化报告到项目路径下的 `docs/check/memory/日期.md`。适用于需要检查后端代码中的静态持有、无限增长缓存、ThreadLocal 滞留、监听器或调度任务堆积、大对象缓冲、资源泄漏、队列堆积等内存风险场景；报告需包含风险证据、影响、触发条件、修复建议和处理进度状态。 |
-| `business-closed-loop-analysis` | 基于项目当前代码、数据结构和配置，还原单个业务功能从用户入口到终态的闭环运行流程，并生成章节稳定的事实文档，重点覆盖参与角色、操作方式、状态流转、数据权限、表关系、字段赋值和核心代码。用于分析已实现业务功能的端到端闭环；不用于设计尚未落地的需求、审查本次改动或生成整个模块的综合架构文档。 |
+| `backend-memory-risk-analysis` | 分析一个项目的后端，尤其是 Java/Spring 服务中可能存在的内存溢出、内存泄漏和异常内存增长风险，并生成完整结构化报告；优先延续已有成果，无既有报告时默认输出到项目路径下的 `docs/check/memory/日期.md`。适用于需要检查后端代码中的静态持有、无限增长缓存、ThreadLocal 滞留、监听器或调度任务堆积、大对象缓冲、资源泄漏、队列堆积等内存风险场景；报告需包含风险证据、影响、触发条件、修复建议和处理进度状态。 |
+| `business-closed-loop-analysis` | 面向开发者，基于当前代码、数据结构和配置，还原一个业务目标从入口到终态的已实现闭环，深入角色、状态、权限、任务交接、表关系、字段赋值和消费口径；支持跨模块及多对象状态联动，不替代技术机制专题、未来需求设计或本次改动核查。 |
 | `business-feature-audit` | 对当前会话或当前 Git 工作区中本次开发涉及的代码做业务闭环核查，判断改动放回业务链路后是否成立，是否存在流程闭环、状态流转、上下游协同、权限、兼容性、数据一致性、异常处理、运营落地和前端业务承接遗漏；支持先基于 Git diff 和会话上下文输出快速业务风险结论，也支持在用户确认模块、范围和目录名后写入 `business-audit.md`。 |
-| `code-review` | Use this skill to review code. It supports both local changes (staged or working tree) and remote Pull Requests (by ID or URL). It focuses on correctness, maintainability, and adherence to project standards. |
-| `design-compliance-audit` | 审查项目 DESIGN 文档本身是否完整、一致、可执行、可验证且符合项目事实，并依据该文档检查前端页面、组件、布局、样式、交互、响应式、配置字段、页面登记、维护清单和验证命令是否合规。用于用户要求审查 DESIGN.md、设计系统文档质量、前端改动是否遵循 DESIGN、页面模板、组件规范、布局规范、风格 token、Design System、设计契约、页面设计闭环或“理论上不应该不遵循 DESIGN”的场景。默认同时审查 DESIGN 事实源和当前项目所有可访问页面及前端实现；也可按用户指定文档、模块、路由、页面文件、PR 或 diff 审查。不替代页面 UX 审美审查，不评估业务算法正确性。 |
+| `code-review` | 审查本地暂存、未暂存改动或指定远端 PR（编号或 URL），重点检查正确性、可维护性和项目规范遵循情况。只要求审查时输出反馈，不修改代码或发布远端评论。 |
+| `config-codex-sync` | 将 Codex 全局技能集合和协作说明同步到 Claude Code 与 Kimi Code 的用户级安装目录；同名技能或文档已存在时以 Codex 内容更新。用于用户要求同步、刷新、复制或对齐 Codex、Claude、Kimi 的全局技能和协作指令时。 |
+| `design-compliance-audit` | 审核 DESIGN 等设计契约的有效性及前端实现遵循情况，用于检查规范冲突、token 与组件规则偏离、登记维护和验收缺口。继承指定文档、页面或改动范围；独立全局审核无范围时覆盖规范与可访问页面。只审核时不改实现或规范；不替代体验评价、一般代码复用治理或设计规范编写。 |
+| `design-spec-authoring` | 在用户要求创建、初始化、补齐或修订 DESIGN.md 等项目设计规范时使用。已有前端从有效契约与实现归纳；从零项目依据需求、品牌资料及已确认设计决策建立初版，无须先有代码。默认只改规范文档，不开发页面；只做体验或合规审核时使用对应审核技能。 |
 | `development-trace` | 为当前会话或当前 Git 工作区中的业务代码改动生成开发留痕文档。仅当用户显式调用 `$development-trace` 时使用，不得根据代码改动、开发完成、文档需求或相似语义自动调用；按功能需求生成或更新 development-trace.md，输出目录遵循全局协作规则。 |
-| `system-disk-usage-analysis` | 分析本机或指定目录的磁盘使用情况，定位高占用目录和可清理目标，并输出带风险分级的结构化报告。用于磁盘空间不足、查找大文件或评估清理方案；不用于未经确认的删除操作。 |
+| `development-workflow` | 在用户要求生成或更新开发计划、拆解任务，或开发功能、修复问题、重构等工作需要组织实施与验证时使用。默认普通模式直接承接自然语言需求，不要求先有 PRD；专业模式以正式需求文档及适用页面原型为前置。不用于纯问答、只审查或仅讨论需求闭环，不因自动调用额外创建计划文件。 |
 | `english-daily-tutor` | 面向小学英语水平、以日常口语听说为目标的中文讲解技能。当用户给出一句完整英文句子并要求"讲一下/拆解/学习/理解/分析"这句、给出中文想学对应的英文说法、或要求复习已学英语知识时使用。输出逐词释义（含常用变形）、语法讲解与中英对比差异、举一反三例句，并把新知识沉淀进本技能目录下的 knowledge/english-knowledge.md。 |
 | `five-dim-stock-analysis` | 基于公开数据完成上市公司五维股票质量分析与季报增量跟踪。用户提供股票代码或公司名，要求判断公司质量、估值、风险、打分、建仓区间，或要求更新季报、复核原判断时使用；以 A 股为主要覆盖范围，不用于只查询股价或泛泛讨论行业。 |
-| `frontend-design` | Guidance for distinctive, intentional visual design when building new UI, web pages, landing pages, dashboards, components, or reshaping an existing frontend. Use when Codex needs aesthetic direction, typography, visual hierarchy, layout, copy, or design quality that avoids generic AI templates and default-looking interfaces. |
-| `frontend-reuse-governance` | 前端开发与代码审查中的复用优先约束。用于 AI 新增或修改前端页面、组件、表格、表单、弹窗、抽屉、筛选、状态逻辑、样式、hook/composable、util、API 封装、测试 helper 时，强制先查找同类实现；只要同类 UI、交互逻辑、状态处理、数据展示模式或参数处理逻辑在代码中第二次出现，就必须优先抽取或消费复用单元。不抽取必须说明清楚理由。也用于用户要求治理重复代码、避免页面私有实现、复用已有组件、减少 AI 堆代码或检查是否应抽组件/抽 hook/抽 util 的场景。 |
+| `frontend-design` | 为新建、重构或局部修改页面与组件提供视觉和交互呈现指导，适用于布局、层级、密度、样式、界面文案和操作反馈设计。覆盖桌面、移动应用、PWA 与品牌页面。纯请求、状态计算或事件逻辑修复不启用；只做体验审核、DESIGN 合规检查或代码复用治理时使用对应专项技能。 |
+| `frontend-prototype-design` | 根据自然语言需求、页面闭环或已有页面制作和更新 HTML 交互原型或结构图原型，用于布局、操作与状态评审及开发交接；格式未明确时询问用户选择。支持独立使用，不要求先有 PRD；不自动生成开发计划或生产代码，仅审核页面体验时使用 frontend-ux-audit。 |
+| `frontend-reuse-governance` | 在前端开发、修改和代码审核中判断组件、状态逻辑、样式、工具与测试辅助的复用及抽象边界。用于查找同类实现、治理重复代码、决定是否抽组件或 hook；同一模式第二次出现须做复用判断。只要求审核时不修改代码；不负责视觉方案、页面体验评价或独立 DESIGN 合规审核。 |
+| `frontend-ux-audit` | 审核页面可观察的视觉、交互、状态反馈、控件必要性及原型实现偏差，用于体验检查、页面验收及体验问题修复后的复测。继承指定页面、当前改动或 diff 范围；独立全局审核未指定范围时覆盖可访问页面。只审核时不改代码；不承担代码重复治理、独立 DESIGN 合规判定或业务规则审核。 |
 | `git-commit-message-authoring` | 根据已确定的 Git 改动范围生成规范化提交消息：先确定文件范围，再读取改动摘要，生成提交文案后直接输出；仅在用户显式调用本技能时交互确认范围，否则自行确定范围且不提问；不执行 git add、git commit 或 git push。 |
 | `git-push` | 推送 Git 提交：先确定提交文件范围，再生成提交信息，随后按范围执行 git add、git commit，并在用户要求推送时执行 git push；仅在用户显式调用本技能时进行交互确认，否则自行完成各流程步骤。 |
-| `project-module-architecture-doc-authoring` | 分析项目代码与现有文档后，按业务模块、平台模块或技术子系统生成和更新架构设计文档。用于用户要求梳理项目架构、为每个模块生成 architecture 文档、补全核心技术/业务架构/使用说明/流程/风险事项、建立模块文档索引、同步 README 与 AGENTS 文档入口的场景。 |
-| `frontend-ux-audit` | 审查前端页面的视觉一致性、排版、颜色、交互直观性、动画、状态反馈、说明指引、控件必要性和页面细节质量。用于用户要求检查页面设计、交互合理性、UI 细节、风格统一、原型实现偏差、页面验收、冗余按钮/冗余控件、功能堆砌或“不要只为了做功能而做功能”的场景。默认审查当前项目所有可访问页面；也可按用户指定模块、路由、页面文件、PR 或变更范围审查。不评估业务算法、接口口径或业务规则正确性。 |
-| `system-process-usage-analysis` | 分析本机当前进程的 CPU、内存、IO、线程和子进程分布，识别最可能导致卡顿或资源异常的进程并输出结构化报告。用于电脑卡顿、风扇高速、资源占用异常等排查；不用于未经确认地结束进程。 |
-| `design-spec-authoring` | 为当前项目生成或更新 `DESIGN.md`：扫描前端代码，沉淀可复用的 UI 规范；前端不统一或关键规范缺失时，先给建议并等待确认。 |
-| `project-handover-analysis` | 基于项目源码、配置、构建与部署材料生成可复核的全局接手分析报告。用于用户要求快速了解、接管、盘点或评估一个完整项目，重点说明总体功能、技术与部署架构、模块职责、跨模块依赖、交付完整性、运行风险和接手路线；不用于只分析单个业务闭环、单个模块架构或仅做代码变更审查。 |
-| `project-readme-authoring` | 生成、重构或优化项目 README.md。用于用户要求创建 README、优化 README、补全项目介绍、梳理安装启动测试构建命令、整理架构模块入口、生成开发者/用户使用说明，并要求基于当前仓库事实和实际命令验证后再落地 README 的场景。 |
-| `requirement-closure-design` | 基于粗需求、核心要点或未闭环想法，补全功能闭环和落地链路，默认先在对话中分析；用户确认或要求保存时，沿用已有成果的结构和完整内容落盘，保留待确认状态。适用于澄清页面、入口、角色、操作、状态、权限、配置、异常与范围，或先完成闭环设计再决定是否生成正式需求文档的场景。 |
-| `requirement-doc-authoring` | 生成完整的项目化需求文档，用于在制定开发计划前澄清功能需求。适用于用户要求创建、补充、确认或保存需求文档、PRD、需求分析、requirement.md，或希望 AI 结合业务需求、当前项目代码、数据库实际情况、交互体验、边界条件、风险和验收标准来充分理解需求，并沉淀为可指导后续 AI 生成高质量开发计划的文档。 |
+| `investment-ai-trend-knowledge-maintenance` | 维护 AI 趋势投资知识源仓库。用于用户要求更新、审查、规范化、复盘或自动化维护 /Users/pengshuaifeng/ai-trend-analysis 中的 Markdown 知识库；也用于判断外部新闻、财报、研报、技术路线、资本开支、订单、产能和政策信息是否应进入 data-source，并同步 metadata、更新记录、候选池和校验闭环。 |
+| `operation-workflow` | 执行服务器运维、故障排查、部署变更、服务器盘点、运维总览及单位手册维护，按前置检查、连接授权、方案授权、执行验证、工作汇报、人工审批及 Git 留痕闭环；仅讨论方案时不连接服务器或实施变更。 |
+| `project-handover-analysis` | 基于源码、配置及构建部署材料评估完整项目或多仓交付包，生成指定版本的接手报告，说明系统全景、交付完整性、风险、阻塞和接手路径；不替代持续维护的技术专题、逐环节业务闭环或具体环境运维手册。 |
+| `project-module-architecture-doc-authoring` | 基于系统当前代码、配置与构建部署材料，生成或更新专一技术主题的事实文档；支持功能模块、平台子系统、系统架构、部署架构及特定技术机制解析。不替代逐环节业务闭环、项目接手评估或具体环境运维手册。 |
+| `project-readme-authoring` | 基于仓库事实生成、重构或局部更新 README.md，提供项目定位、最小运行与使用路径、开发入口和文档导航，命令复用 AI 约束文档编写技能维护的项目文档；适用于项目入口文档维护，不替代技术专题、业务闭环分析或项目接手评估。 |
+| `requirement-closure-design` | 基于粗需求或未闭环想法补全角色、入口、操作、状态、权限、异常与范围，默认先在对话中分析；用户要求保存或确认闭环可落地时保存当前成果并保留未决状态。用于功能闭环设计与细化，不自动生成正式 PRD、原型或开发计划。 |
+| `requirement-doc-authoring` | 在用户明确要求创建、补充、更新或保存正式需求文档、PRD、requirement.md 时，结合项目事实生成可追溯、可验收的需求成果。承接已有闭环并按需协作页面原型；仅讨论粗需求或功能闭环时使用 requirement-closure-design，不自动落正式文档。 |
 | `setup-dm-mcp` | 为当前项目注册达梦（DM）数据库 MCP 服务器。如项目已有 .codex-mcp/dm-db-mcp/run.sh 则直接复用；否则从技能模板自动创建完整实现（Java 源码 + run.sh）。连接参数直接写入 .mcp.json 的 env（不使用 ~/.codex/secrets），并更新 .claude/settings.json 免确认授权、执行 health_check 连接验证。适用于用户要求"注册 DM MCP"、"setup dm mcp"、"创建达梦数据库 mcp"等场景。 |
 | `setup-redis-mcp` | 为当前项目注册 Redis MCP 服务器。如项目已有 .codex-mcp/redis-mcp/run.sh 则直接复用；否则从技能模板自动创建完整实现（纯 Java 实现，零依赖，内置 RESP 协议）。连接参数直接写入 .mcp.json 的 env（不使用 ~/.codex/secrets），并更新 .claude/settings.json 免确认授权、执行 health_check 连接验证。适用于用户要求"注册 Redis MCP"、"setup redis mcp"、"创建 redis mcp"、"生成 redis mcp"等场景。 |
 | `setup-taos-mcp` | 为当前项目注册 TDengine（TaoS）时序数据库 MCP 服务器。如项目已有 .codex-mcp/taos-db-mcp/run.sh 则直接复用；否则从技能模板自动创建完整实现（Java 源码 + run.sh）。连接参数直接写入 .mcp.json 的 env（不使用 ~/.codex/secrets），并更新 .claude/settings.json 免确认授权、执行 health_check 连接验证。适用于用户要求"注册 TDengine MCP"、"setup taos mcp"、"创建 taos 数据库 mcp"等场景。 |
-| `config-codex-sync` | 将 Codex 全局技能集合和协作说明同步到 Claude Code 与 Kimi Code 的用户级安装目录；同名技能或文档已存在时以 Codex 内容更新。用于用户要求同步、刷新、复制或对齐 Codex、Claude、Kimi 的全局技能和协作指令时。 |
+| `skill-authoring-standard` | 创建或重构用户自有技能、统一技能名称时，规范英文标识与中文名称，以及职责边界、输入、执行流程、核心约束、输出与验证的默认结构。局部修改仅核对受影响内容；不替代产物模板技能的专用创建流程，不用于普通业务文档或未经要求批量重排现有技能。 |
+| `system-disk-usage-analysis` | 分析本机或指定目录的磁盘使用情况，定位高占用目录和可清理目标，并输出带风险分级的结构化报告。用于磁盘空间不足、查找大文件或评估清理方案；不用于未经确认的删除操作。 |
+| `system-process-usage-analysis` | 分析本机当前进程的 CPU、内存、IO、线程和子进程分布，识别最可能导致卡顿或资源异常的进程并输出结构化报告。用于电脑卡顿、风扇高速、资源占用异常等排查；不用于未经确认地结束进程。 |
 
 ## 使用方式
 

@@ -1,0 +1,3 @@
+interface:
+  display_name: "运维操作"
+  short_description: "按授权完成服务器运维、服务器盘点、总览与单位手册维护及 Git 留痕"

@@ -125,15 +125,15 @@ def validate(text: str, language: str, custom_structure: bool = False) -> list[s
         errors.append(f"expected exactly one level-1 title, found {len(h1)}")
 
     if custom_structure:
-        if not sections:
-            errors.append("expected at least one non-empty level-2 section")
+        if not has_content(text):
+            errors.append("document has no body content")
+        if PLACEHOLDER_RE.search(prose_without_fences(text)):
+            errors.append("document contains placeholder content")
         for title in sorted({title for title in titles if titles.count(title) > 1}):
             errors.append(f"duplicate level-2 section: '{title}'")
         for title, body in sections:
             if not has_content(body):
                 errors.append(f"section '{title}' is empty")
-            if PLACEHOLDER_RE.search(prose_without_fences(body)):
-                errors.append(f"section '{title}' contains placeholder content")
         return errors
 
     selected_language = detect_language(titles) if language == "auto" else language
@@ -231,6 +231,24 @@ Documentation.
         return 1
     if validate("# Custom\n\n## Custom Section\nContent.\n", "auto", True):
         print("self-test failed: valid custom fixture rejected", file=sys.stderr)
+        return 1
+    # Custom layout may omit H2 headings, but must still contain finished content.
+    custom_cases = [
+        ("# Custom\n\nPurpose and instructions.\n", True),
+        ("# Custom\n\n```text\nTODO: example data\n```\n", True),
+        ("# Custom\n", False),
+        ("# Custom\n\n```\n```\n", False),
+        ("# Custom\n\nTODO: finish introduction\n", False),
+        ("# Custom\nTODO: introduction\n## Scope\nContent.\n", False),
+        ("# Custom\nContent.\n## Empty\n", False),
+        ("# Custom\n## Same\nFirst.\n## Same\nSecond.\n", False),
+    ]
+    for sample, valid in custom_cases:
+        if (not validate(sample, "auto", True)) != valid:
+            print("self-test failed: custom body validation", file=sys.stderr)
+            return 1
+    if not validate(custom_cases[0][0], "zh"):
+        print("self-test failed: fixed contract was relaxed", file=sys.stderr)
         return 1
     print("self-test passed")
     return 0

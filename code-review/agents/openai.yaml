@@ -1,0 +1,4 @@
+interface:
+  display_name: "代码审查"
+  short_description: "审查本地改动或远端 PR 的正确性、可维护性和项目规范遵循情况"
+  default_prompt: "使用 $code-review 审查当前本地改动或指定远端 PR，给出有证据的问题、建议和验证限制。"

@@ -1,4 +1,4 @@
 interface:
   display_name: "页面体验审核"
-  short_description: "审查页面视觉统一性、交互直观性、冗余控件与细节质量"
-  default_prompt: "Use $frontend-ux-audit to audit the current project's pages for visual consistency, interaction clarity, redundant controls, and UI polish."
+  short_description: "审核指定页面或当前改动的视觉、交互、状态反馈与控件必要性"
+  default_prompt: "使用 $frontend-ux-audit 审核指定页面或当前改动的体验，给出有证据的问题与建议；仅在已获修复授权时修改并复测。"

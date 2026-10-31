@@ -1,4 +1,4 @@
 interface:
   display_name: "前端复用治理"
-  short_description: "前端开发时强制复用优先，治理重复实现和抽象边界风险"
-  default_prompt: "Use $frontend-reuse-governance to enforce reuse-first frontend development and prevent repeated UI, state, table, form, and styling implementations."
+  short_description: "审核前端重复实现与抽象边界，或在已授权开发中实施复用和迁移"
+  default_prompt: "使用 $frontend-reuse-governance 检查指定范围的复用与抽象边界；只要求审核时给出建议，已授权开发或修复时再实施。"

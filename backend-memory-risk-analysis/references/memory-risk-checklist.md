@@ -102,6 +102,7 @@ Check for:
 - `ByteArrayOutputStream`
 - in-memory Excel or CSV generation
 - large JSON serialization and repeated object copying
+- hot paths repeatedly creating large objects or converting the same payload through multiple in-memory forms
 - image, stream, binary, or telemetry payload buffering
 
 Typical risk:
@@ -121,27 +122,7 @@ Typical risk:
 
 - Retained native or heap-backed resources increase memory pressure over time.
 
-## 3. Risk Rating Guidance
-
-Use this scale:
-
-### High Risk
-
-- Strong evidence of unbounded retention or guaranteed long-lived references.
-
-### Medium Risk
-
-- Clear growth pattern exists, but cleanup logic or triggering conditions are uncertain.
-
-### Low Risk
-
-- Pattern is suspicious but current evidence is weak.
-
-### Needs Runtime Evidence
-
-- Code suggests risk, but proof needs heap dump, profiler, GC log, allocation flame graph, or production metrics.
-
-## 4. Suggested Search Patterns
+## 3. Suggested Search Patterns
 
 Useful search patterns for Java/Spring projects:
 
@@ -166,42 +147,13 @@ Useful search patterns for Java/Spring projects:
 - `collect(Collectors.toList())`
 - `stream().map`
 - `findAll`
+- `new HashMap`
+- `new ArrayList`
+- `newFixedThreadPool`
+- `newCachedThreadPool`
+- `EasyExcel`
+- `subList`
 
-## 5. Report Writing Rules
+## 4. Report Contract
 
-For every finding, always include:
-
-1. Severity
-2. Code location
-3. Risk type
-4. Progress status
-4. Trigger condition
-5. Evidence
-6. Impact
-7. Fix recommendation
-
-If a finding cannot be proven from code alone, explicitly say what runtime evidence is still needed.
-
-Use one of these progress statuses:
-
-1. `已处理`
-2. `未处理`
-3. `业务需要`
-4. `不重要`
-5. `需运行时验证`
-
-Write the final report to:
-
-- `doc/check/memory/{日期}.md`
-
-Use `YYYY-MM-DD` for `{日期}` by default.
-
-Before generating the current report, first locate the latest existing report under `doc/check/memory` and use it as the baseline.
-
-When using the baseline report:
-
-1. Update the status of previously recorded risks based on the current code.
-2. Update severity, evidence, impact, and recommendations if the current code changed.
-3. Append newly discovered risks that did not exist in the latest report.
-
-If the report for the same date already exists, continue updating that file instead of replacing valid prior content blindly.
+Use [the rating rules](../SKILL.md#第四步分级与判定) for risk levels and [SKILL.md](../SKILL.md) for evidence requirements, progress states, baseline handling and the output path. Read [the report template](output-template.md#内存风险报告) when generating the report; keep evidence, trigger conditions, impact, treatment and runtime verification together for each finding. This checklist defines risk patterns, not a second report or storage contract.

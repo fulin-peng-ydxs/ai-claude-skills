@@ -122,15 +122,15 @@ def validate_custom_structure(text: str, document_name: str) -> list[str]:
 
     if len(h1) != 1:
         errors.append(f"{document_name}: expected exactly one level-1 title, found {len(h1)}")
-    if not sections:
-        errors.append(f"{document_name}: expected at least one non-empty level-2 section")
+    if not has_content(text):
+        errors.append(f"{document_name}: document has no body content")
+    if PLACEHOLDER_RE.search(prose_without_fences(text)):
+        errors.append(f"{document_name}: document contains placeholder content")
     for title in sorted({title for title in titles if titles.count(title) > 1}):
         errors.append(f"{document_name}: duplicate level-2 section '{title}'")
     for title, body in sections:
         if not has_content(body):
             errors.append(f"{document_name}: section '{title}' is empty")
-        if PLACEHOLDER_RE.search(prose_without_fences(body)):
-            errors.append(f"{document_name}: section '{title}' contains placeholder content")
     return errors
 
 
@@ -243,7 +243,36 @@ def validate_claude(text: str, language: str, custom_structure: bool = False) ->
     return errors
 
 
+def validate_repository(
+    root: Path, language: str, custom_structure: bool, document: str = "both"
+) -> list[str]:
+    """Validate only the selected deliverables; the default retains paired checks."""
+    errors: list[str] = []
+    selected_language = None
+    if document in ("agents", "both"):
+        path = root / "AGENTS.md"
+        if not path.is_file():
+            errors.append(f"missing file: {path}")
+        else:
+            agents_errors, selected_language = validate_agents(
+                path.read_text(encoding="utf-8"), language, custom_structure
+            )
+            errors.extend(agents_errors)
+    if document in ("claude", "both"):
+        path = root / "CLAUDE.md"
+        if not path.is_file():
+            errors.append(f"missing file: {path}")
+        else:
+            claude_language = selected_language if language == "auto" and selected_language else language
+            errors.extend(validate_claude(
+                path.read_text(encoding="utf-8"), claude_language, custom_structure
+            ))
+    return errors
+
+
 def self_test() -> int:
+    from tempfile import TemporaryDirectory
+
     # Markdown examples may contain shorter or different fence markers.
     for opening, inner, closing in [("````markdown", "```python", "````"), ("~~~", "```", "~~~"), ("````", "```", "`````")]:
         sample = f"# Title\n## Real\n{opening}\n{inner}\n## Example\nTODO: code\n{closing}\n## Next\nText.\n"
@@ -331,6 +360,62 @@ Read project rules first.
     ):
         print("self-test failed: valid custom fixtures rejected", file=sys.stderr)
         return 1
+    # Thin entries need no artificial H2, while empty bodies and placeholders fail.
+    thin_claude = "# Claude Code 项目入口\n\n本文仅维护入口；规则以 [AGENTS.md](AGENTS.md) 为准，改动前先读取规则与相关实现。\n"
+    custom_cases = [
+        (thin_claude, True),
+        ("# Custom\n\n```text\nTODO: example data\n```\n", True),
+        ("# Custom\n", False),
+        ("# Custom\n\n```\n```\n", False),
+        ("# Custom\nTODO: finish introduction\n", False),
+        ("# Custom\nTODO: introduction\n## Scope\nContent.\n", False),
+        ("# Custom\nContent.\n## Empty\n", False),
+        ("# Custom\n## Same\nFirst.\n## Same\nSecond.\n", False),
+    ]
+    for sample, valid in custom_cases:
+        if (not validate_agents(sample, "auto", True)[0]) != valid:
+            print("self-test failed: custom body validation", file=sys.stderr)
+            return 1
+    if validate_claude(thin_claude, "auto", True) or not validate_claude(thin_claude, "zh"):
+        print("self-test failed: thin entry or fixed contract validation", file=sys.stderr)
+        return 1
+    for invalid in [
+        thin_claude.replace("AGENTS.md", "missing-source"),
+        thin_claude + "\n```bash\necho run\n```\n",
+    ]:
+        if not validate_claude(invalid, "auto", True):
+            print("self-test failed: invalid thin entry accepted", file=sys.stderr)
+            return 1
+    # Selection checks real files: an unselected file must not become a prerequisite.
+    with TemporaryDirectory(prefix="ai-constraint-validation-") as directory:
+        root = Path(directory)
+        for selected, other, content in [
+            ("agents", "CLAUDE.md", custom_agents),
+            ("claude", "AGENTS.md", thin_claude),
+        ]:
+            target = root / ("AGENTS.md" if selected == "agents" else "CLAUDE.md")
+            if not validate_repository(root, "auto", True, selected):
+                print("self-test failed: missing selected file accepted", file=sys.stderr)
+                return 1
+            target.write_text(content, encoding="utf-8")
+            if validate_repository(root, "auto", True, selected):
+                print("self-test failed: single deliverable rejected", file=sys.stderr)
+                return 1
+            if not validate_repository(root, "auto", True):
+                print("self-test failed: default no longer requires both files", file=sys.stderr)
+                return 1
+            companion = root / other
+            companion.write_text("# Unfinished\n", encoding="utf-8")
+            if validate_repository(root, "auto", True, selected) or not validate_repository(root, "auto", True):
+                print("self-test failed: selection did not isolate validation", file=sys.stderr)
+                return 1
+            companion.unlink()
+            target.unlink()
+        (root / "AGENTS.md").write_text(custom_agents, encoding="utf-8")
+        (root / "CLAUDE.md").write_text(thin_claude, encoding="utf-8")
+        if validate_repository(root, "auto", True):
+            print("self-test failed: valid pair rejected", file=sys.stderr)
+            return 1
     print("self-test passed")
     return 0
 
@@ -340,7 +425,11 @@ def main() -> int:
     parser.add_argument(
         "repo_root",
         nargs="?",
-        help="repository root containing AGENTS.md and CLAUDE.md",
+        help="repository root containing the selected document(s)",
+    )
+    parser.add_argument(
+        "--document", choices=("agents", "claude", "both"), default="both",
+        help="deliverables to validate (default: both); does not create missing files",
     )
     parser.add_argument("--language", choices=("auto", "zh", "en"), default="auto")
     parser.add_argument("--custom-structure", action="store_true")
@@ -353,36 +442,13 @@ def main() -> int:
         parser.error("repo_root is required unless --self-test is used")
 
     root = Path(args.repo_root)
-    agents_path = root / "AGENTS.md"
-    claude_path = root / "CLAUDE.md"
-    errors: list[str] = []
-
-    if not agents_path.is_file():
-        errors.append(f"missing file: {agents_path}")
-        selected_language = None
-    else:
-        agents_errors, selected_language = validate_agents(
-            agents_path.read_text(encoding="utf-8"), args.language, args.custom_structure
-        )
-        errors.extend(agents_errors)
-
-    if not claude_path.is_file():
-        errors.append(f"missing file: {claude_path}")
-    else:
-        claude_language = selected_language if args.language == "auto" and selected_language else args.language
-        errors.extend(
-            validate_claude(
-                claude_path.read_text(encoding="utf-8"),
-                claude_language,
-                args.custom_structure,
-            )
-        )
+    errors = validate_repository(root, args.language, args.custom_structure, args.document)
 
     if errors:
         for error in errors:
             print(f"ERROR: {error}", file=sys.stderr)
         return 1
-    print(f"AI constraint document structure valid: {root}")
+    print(f"AI constraint document structure valid ({args.document}): {root}")
     return 0
 
 

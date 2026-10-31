@@ -25,14 +25,8 @@
 - 构建：仅当项目声明可打包且 `build` 可用或已声明时执行 `python -m build`。
 - 本地启动：优先使用仓库脚本；否则只有从代码确认入口后，才使用 `python -m <package>.cli serve`、`uvicorn module:app`、`fastapi dev`、`python manage.py runserver` 等框架命令。
 
-## 写入文档
+## 技术栈特有记录
 
-记录：
-
-- `pyproject.toml` 中的 Python 要求范围，以及本次实际执行得到的本地版本。
-- 已通过的测试命令和测试范围。
-- 构建命令仅在通过后写入。
-- 服务启动、状态、停止和健康检查仅在验证通过后写入。
-- 仅当配置或文档能证明项目依赖时，才写 PostgreSQL、Redis、队列、对象存储或本地数据库等外部服务。
+落地前按 [输出契约](../output-contract.md#内容选择与表达) 区分长期规则与本次验证汇报，命令必须通过 [验证门禁](../verification-gate.md)。Python 项目补充 `pyproject.toml` 声明的 Python 要求范围、测试路径及范围；外部服务只有配置或文档能证明项目依赖时才写入。
 
 不要根据目录名猜框架命令；必须从代码、脚本或文档确认入口。

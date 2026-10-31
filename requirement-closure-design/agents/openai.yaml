@@ -1,4 +1,4 @@
 interface:
   display_name: "需求闭环设计"
-  short_description: "先补全完整功能闭环，确认后保存闭环文档"
-  default_prompt: "使用 $requirement-closure-design 先基于我的初步需求补全完整功能闭环，不要直接创建文档；我确认闭环无问题后，再保存闭环文档。"
+  short_description: "先分析功能闭环，按授权保存完整成果并保留确认状态与未决项"
+  default_prompt: "使用 $requirement-closure-design 基于我的初步需求补全功能闭环，先在对话中分析；按我的保存请求或闭环确认保存当前成果，保留未决状态。"

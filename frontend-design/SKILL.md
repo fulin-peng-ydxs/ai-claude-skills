@@ -1,54 +1,98 @@
 ---
 name: frontend-design
-description: Guidance for distinctive, intentional visual design when building new UI, web pages, landing pages, dashboards, components, or reshaping an existing frontend. Use when Codex needs aesthetic direction, typography, visual hierarchy, layout, copy, or design quality that avoids generic AI templates and default-looking interfaces.
+description: 为新建、重构或局部修改页面与组件提供视觉和交互呈现指导，适用于布局、层级、密度、样式、界面文案和操作反馈设计。覆盖桌面、移动应用、PWA 与品牌页面。纯请求、状态计算或事件逻辑修复不启用；只做体验审核、DESIGN 合规检查或代码复用治理时使用对应专项技能。
 ---
 
 # 前端设计
 
-Approach this as the design lead at a small studio known for giving every client a visual identity that could not be mistaken for anyone else's. This client has already rejected proposals that felt templated, and is paying for a distinctive point of view: make deliberate, opinionated choices about palette, typography, and layout that are specific to this brief, and take one real aesthetic risk you can justify.
+## 职责与边界
 
-## Ground it in the subject
+根据产品、受众和用户要求作出有依据的设计选择。确定字体、密度或视觉处理方式前，先读取项目设计系统及同角色组件；已有契约保持有效，除非用户授权变更。
 
-If the brief does not pin down what the product or subject is, pin it yourself before designing: name one concrete subject, its audience, and the page's single job, and state your choice. If there's any information in your memory about the human's preferences, context about what they're building, or designs you've made before, use that as a hint. The subject's own world, its materials, instruments, artifacts, and vernacular, is where distinctive choices come from. Build with the brief's real content and subject matter throughout.
+本文维护视觉与交互呈现的决策方法；项目 DESIGN 维护实际契约，[交互设计清单](references/interaction-design-checklist.md) 维护按能力选择的检查项，原型产物由原型技能维护。
 
-## Design principles
+### 范围与协作
 
-For web designs, the hero is a thesis. Open with the most characteristic thing in the subject's world, in whatever form makes sense for it: a headline, an image, an animation, a live demo, an interactive moment. Be deliberate with your choice: a big number with a small label, supporting stats, and a gradient accent is the template answer, only use if that's truly the best option.
+- 用户要求制作或更新 HTML 交互原型或结构图原型时，由 `frontend-prototype-design` 承接形式选择、产物和交接，本技能提供需要的视觉与交互呈现指导。
 
-Typography carries the personality of the page. Pair the display and body faces deliberately, not the same families you would reach for on any other project, and set a clear type scale with intentional weights, widths, and spacing. Make the type treatment itself a memorable part of the design, not a neutral delivery vehicle for the content.
+- 局部修改继承目标页面、组件及受影响使用点，按既有设计系统完成，不自动重做全页视觉。用户仅请求设计方案时不直接修改代码；方案内容与组织方式见“产出边界与交付”。
+- 实现涉及组件、状态、样式或工具复用时配合 `frontend-reuse-governance`；设计自审覆盖本次改动，不自动启动全站专项审核。
+- 用户要求专项审核时，体验交给 `frontend-ux-audit`，既有契约合规交给 `design-compliance-audit`；创建或更新设计规范交给 `design-spec-authoring`，不因改页面自动改规范。
+- 从零项目要求先建立规范时，本技能只协助形成必要的视觉与交互方案，由 `design-spec-authoring` 沉淀已确认或授权范围内的选择；没有代码不要求先开发页面，已有明确方案不重复探索。
+- “优化页面”按用户目标区分：要求改善呈现时使用本技能；要求先找问题时使用体验审核；“审核并修复”先定位缺陷，只有修复需要新的呈现方案时再使用本技能，按既有规范即可修好的问题直接修复。
 
-Structure is information. Structural devices, numbering, eyebrows, dividers, labels, should encode something true about the content, not decorate it. Many generic designs use numbered markers (01 / 02 / 03), but that's only appropriate if the content actually is a sequence, like a real process or a typed timeline where order carries information the reader needs. Question if choices like numbered markers actually make sense before incorporating them.
+## 输入与前置条件
 
-Leverage motion deliberately. Think about where and if animation can serve the subject: a page-load sequence, a scroll-triggered reveal, hover micro-interactions, ambient atmosphere. An orchestrated moment usually lands harder than scattered effects; choose what the direction calls for. However, sometimes less is more, and extra animation contributes to the feeling that the design is AI-generated.
+### 判断产品场景
 
-Match complexity to the vision. Maximalist directions need elaborate execution; minimal directions need precision in spacing, type, and detail. Elegance is executing the chosen vision well.
+- 注重视觉表达的落地页、内容专题页或品牌页，在用户与既有设计系统留有设计自由时，明确一个体现主题、能让人记住的视觉重点，并用字体、版式或主题素材支撑它。辨识度要求仅作用于允许探索的范围，不覆盖指定风格，也不套用于任务型后台、成熟产品的常规维护或局部修补。
+- 移动应用、PWA 和高频任务工具，使用下文的任务界面指导。优先保证任务效率与控件一致性，不要求必须设计大幅首屏展示区、重新搭配字体或尝试冒险的视觉方案。
+- 根据目标功能及具体元素理解用户反馈。调整容器背景与调整其中按钮是不同改动；改善层级标记的外观，不等于获得删除层级要求的授权。日常样式选择依据已有要求处理，不反复索取确认。
 
-Consider written content carefully. Often a design brief may not contain real content, and it's up to you to come up with copy. Copy can make a design feel as templated as the design itself. See the below section on writing for more guidance.
+### 任务界面与设备适配
 
-## Process: brainstorm, explore, plan, critique, build, critique again
+涉及任务型页面、表单、列表、图表或导航状态设计时，按需读取 [交互设计清单](references/interaction-design-checklist.md) 的通用部分；触摸与原生输入按受影响能力读取对应部分。桌面 PWA 同样适用通用规则，可安装不等于需要手机布局。
 
-For calibration: AI-generated design right now clusters around three looks: (1) a warm cream background (near #F4F1EA) with a high-contrast serif display and a terracotta accent; (2) a near-black background with a single bright acid-green or vermilion accent; (3) a broadsheet-style layout with hairline rules, zero border-radius, and dense newspaper-like columns. All three are legitimate for some briefs, but they are defaults rather than choices, and they appear regardless of subject. Where the brief pins down a visual direction, follow it exactly. The brief's own words always win, including when it asks for one of these looks. Where it leaves an axis free, don't spend that freedom on one of these defaults. Just like a human designer who's hired, there's often a careful balance between doing what you're good at and taking each project as a chance to experiment and learn.
+围绕高频任务、目标输入方式和项目既有组件角色进行设计。调整密度或样式前，明确哪些区域固定、哪些区域滚动，以及导航后保留哪些状态。检查清单提供判断依据；尺寸、对齐方式、时序和终端验证要求来自项目规范与用户要求。
 
-Work in two passes. First, brainstorm a short design plan based on the human's design brief: create a compact token system with color, type, layout, and signature. Color: describe the palette as 4-6 named hex values. Type: the typefaces for 2+ roles: a characterful display face that's used with restraint, a complementary body face, and a utility face for captions or data if needed. Layout: a layout concept, using one-sentence prose descriptions and ASCII wireframes to ideate and compare. Signature: the single unique element this page will be remembered by that embodies the brief in an appropriate way.
+布局调整前，按交互设计清单识别核心操作、辅助配置与结果查看的边界，以及现有任务路径。优化呈现不自动授权隐藏核心控件、增加操作层级或改变导航；已明确授权的交互重构按目标执行，无须重复确认。参考其他系统时，对照区域职责、控件角色、状态反馈和任务路径，不能只继承配色或组件外观。
 
-Then review that plan against the brief before building: if any part of it reads like the generic default you would produce for any similar page rather than a choice made for this specific brief, revise that part, say what you changed and why. Only after you've confirmed the relative uniqueness of your design plan should you start to write the code, following the revised plan exactly and deriving every color and type decision from it.
+### 从具体主题出发
 
-When writing the code, be careful of structuring your CSS selector specificities. It's easy to generate CSS classes that cancel each other out, especially with a type-based selector like `.section` and an element-based selector like `.cta`. This can happen often with paddings and margins between sections.
+用户要求未明确产品或主题时，设计前先确定一个具体主题、目标受众和页面的核心任务，并说明选择。已有用户偏好、产品背景或过往设计信息可作为参考。鲜明的设计应来自主题自身的材料、工具、实物和惯用表达；全过程使用与要求相符的真实内容和主题素材。
 
-Try to do a lot of this planning and iteration in your thinking, and only show ideas to the user when you have higher confidence it'll delight them.
+## 执行流程
 
-## Restraint and self-critique
+### 工作过程：构思、探索、规划、评估、实现、再次评估
 
-Spend your boldness in one place. Let the signature element be the one memorable thing, keep everything around it quiet and disciplined, and cut any decoration that does not serve the brief. Not taking a risk can be a risk itself. Build to a quality floor without announcing it: responsive down to mobile, visible keyboard focus, reduced motion respected. Critique your own work as you build, taking screenshots if your environment supports it. A picture is worth 1000 tokens. Consider the advice: before leaving the house, take a look in the mirror and remove one accessory. Human creators have memory and always try to do something new, so if you have a space to quickly jot down notes about what you've tried, it can help you in future passes.
+校准视觉选择时，留意常见的 AI 设计套路：（1）暖奶油色背景（接近 #F4F1EA），搭配强对比衬线展示字体和陶土色强调；（2）近黑背景，搭配单一亮荧光绿或朱红强调；（3）报纸式布局，使用细线、直角和密集分栏。用户已指定方向时严格遵循，即使要求上述风格也以用户要求为准。视觉表达型页面留有设计自由时，不默认套用这些组合；采用时须有与当前主题相关的具体依据，不能只因熟悉或容易实现而选择。
 
-## More on writing in design
+没有既有设计系统、且注重视觉表达的网站，分两轮处理。先根据用户要求构思简短设计方案，确定颜色、字体、布局和标志性元素，形成精简的 token 系统。颜色使用 4–6 个命名的十六进制色值；字体按需选择展示、正文、说明或数据角色；布局用简短文字和 ASCII 线框比较方案；标志性元素应体现主题。已有 App 则将任务、控件角色和交互状态映射到项目当前 token 与组件。
 
-Words appear in a design for one reason: to make it easier to understand, and therefore easier to use. They are design material, not decoration. Bring the same intentionality to copy that you would bring to spacing and color. Before writing anything, ask what the design needs to say, and how it can best be said to help the person navigate the experience.
+实现前再对照用户要求评估选择。对允许探索的视觉表达型页面，检查方案是否换个品牌名和文案就能原样用于无关主题；若是，先修正缺少主题依据的视觉重点、字体或版式，再开始实现。App 则修正拖慢任务或违背设计系统的信息顺序、密度及交互。颜色与字体选择应服务最终方案，实现后检查实际渲染结果。
 
-Write from the end user's side of the screen. Name things by what people control and recognize, never by how the system is built. A person manages notifications, not webhook config. Describe what something does in plain terms rather than selling it. Being specific is always better than being clever.
+编码时注意 CSS 选择器的优先级和覆盖关系，避免 `.section`、`.cta` 等 class 的样式相互覆盖，尤其检查区域间的内边距与外边距。
 
-Use active voice as default. A control should say exactly what happens when it's used: "Save changes," not "Submit." An action keeps the same name through the whole flow, so the button that says "Publish" produces a toast that says "Published." The vocabulary of an interface is the signposting for someone navigating the product. Cohesion and consistency are how people learn their way around.
+尽量先在内部完成方案推敲与迭代，形成较有把握、能满足用户期待的方案后再展示。
 
-Treat failure and emptiness as moments for direction, not mood. Explain what went wrong and how to fix it, in the interface's voice rather than a person's. Errors don't apologize, and they are never vague about what happened. An empty screen is an invitation to act.
+## 核心约束
 
-Keep the register conversational and tuned: plain verbs, sentence case, no filler, with tone matched to the brand and the audience. Let each element do exactly one job. A label labels, an example demonstrates, and nothing quietly does double duty.
+### 设计原则
+
+落地页和内容专题页的首屏应表达核心主张。以主题最有代表性的内容开场，形式可以是标题、图片、动画、实时演示或交互体验。选择须有依据；大数字配小标签、辅助统计和渐变强调是常见模板，只在确实适合时采用。
+
+注重视觉表达的网站通过字体与版式传达主题个性。在允许探索的范围内，不只使用惯常字体搭配和默认布局；让字号层级、字重、字宽、间距与构图共同形成可识别的表达。成熟产品保留既有字体系统，通过已有角色表达层级，不以追求新颖为由换字体。
+
+结构本身应传达信息。编号、标题上方的引题、分隔线和标签须表达内容的真实关系，而非纯装饰。编号标记（01 / 02 / 03）仅在内容确有顺序时适用，例如实际流程或次序具有信息价值的时间线。采用编号等结构手段前，先判断其是否有意义。
+
+有目的地使用动效。判断页面载入序列、滚动触发展示、悬停微交互或氛围动效是否服务主题。统一编排的关键动效通常比零散效果更有表现力，具体取舍服从设计方向。适度克制，多余动画容易增加模板化的 AI 生成感。
+
+复杂度应匹配设计方向。丰富的视觉方案需要充分实现；简洁方案需要精确处理间距、字体和细节。设计品质来自对既定方向的完整执行。
+
+认真设计文案。用户要求未提供实际内容时，需要结合主题补充。文案和视觉同样可能呈现模板感，具体方法见下文的设计文案部分。
+
+### 设计文案
+
+界面文字用于帮助理解和使用，是设计材料而非装饰。文案应像间距和颜色一样有明确意图。写作前先判断界面需要表达什么，以及怎样表达能帮助用户完成任务。
+
+从用户视角写作，按用户能识别和控制的事物命名，不按系统实现命名。例如用户管理的是通知，而非 webhook 配置。用平实语言说明功能，不使用推销式表达；具体清楚优于刻意巧妙。
+
+默认使用主动表达。控件文案准确说明结果，例如“保存修改”，而非泛泛的“提交”。同一动作在完整流程中保持名称一致，例如“发布”按钮对应“已发布”提示。界面用词提供操作指引，一致表达帮助用户学习使用产品。
+
+失败和空状态应提供行动方向，而非渲染情绪。用界面自身的语气说明问题与修复方法，不模仿个人情绪；错误提示不靠道歉填充，也不模糊发生了什么。空页面应引导下一步行动。
+
+语言自然，使用简单动词，删除填充词，语气匹配品牌与受众；英文文案采用句首大写。每个元素职责单一：标签用于标识，示例用于演示，不让同一元素暗中承担不同职责。
+
+## 产出边界与交付
+
+仅请求方案时在对话中交付，不自动落盘。方案按 [文档结构与输出规范](~/ai-agent-config/config/force/document-output.md) 使用**参考结构**，组织遵循 [面向读者的组织与审阅](~/ai-agent-config/config/force/document-output.md#面向读者的组织与审阅)：以页面任务或关键设计选择为单元，将目标、依据、布局与操作状态、适用视口和待确认选择就近说明，保留整体范围。
+
+已授权开发时交付受影响页面或组件及验证结果，不自动生成原型、重写 DESIGN 或创建过程报告。交付说明实际采用的设计依据、呈现与状态变化及未验证项。
+
+## 验证与完成标准
+
+### 克制与自审
+
+视觉表达型网站将大胆设计集中在一个重点，其余部分保持克制。任务型 App 优先保证一致性、清楚层级和较低交互成本。删除不服务需求的装饰。检查支持的响应式布局、可见焦点和减少动态效果偏好。
+
+实现影响呈现或操作可达性的改动后，主动完成受影响范围的浏览器验证，不等待用户另行要求“审核页面”。读取 [前端验证规范](~/ai-agent-config/config/force/frontend-verification.md)，按改动风险选场景、采集证据并判断完成条件；发现缺陷后在已授权范围内修复并复测。这是开发自审，不自动扩大为全站体验审核。检查发现和未验证项默认在回复中说明，用户要求保存过程记录时再落盘。

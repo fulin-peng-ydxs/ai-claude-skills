@@ -6,12 +6,16 @@ from __future__ import annotations
 import argparse
 import filecmp
 import os
+import re
 import shutil
 import stat
 import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+
+
+CODEX_ONLY_SKILLS = {"automation-management"}
 
 
 IGNORED_NAMES = {
@@ -84,6 +88,10 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="只预览，不创建或更新任何文件。",
     )
+    parser.add_argument(
+        "--delete", action="store_true",
+        help="同名技能清理：仅删除同名技能内多余文件；保留目标独有技能、MCP、Codex 专属技能、隐藏项和符号链接。",
+    )
     return parser.parse_args()
 
 
@@ -110,6 +118,71 @@ def validate_paths(source_root: Path, targets: list[tuple[str, Path]]) -> None:
             raise SyncError(f"{label} 根目录不能位于 Codex skills 内部：{target_root}")
         if target_root.exists() and not target_root.is_dir():
             raise SyncError(f"{label} 根路径不是目录：{target_root}")
+        target_skills = target_root / "skills"
+        if target_skills.is_symlink():
+            raise SyncError(f"目标 skills 不得为符号链接：{target_skills}")
+        if is_relative_to(source_root, target_root) or is_relative_to(target_root, source_root):
+            raise SyncError(f"源与目标不能互相嵌套：{source_root} -> {target_root}")
+    for index, (_, left) in enumerate(targets):
+        for _, right in targets[index + 1:]:
+            if is_relative_to(left, right) or is_relative_to(right, left):
+                raise SyncError(f"同步目标不能重合或互相嵌套：{left}、{right}")
+
+
+def protected_entry(path: Path) -> bool:
+    """Never delete hidden data, repository metadata, caches or symlink targets."""
+    return path.name.startswith(".") or path.name in IGNORED_NAMES or path.suffix == ".pyc" or path.is_symlink()
+
+
+def plan_deletions(source_skills: Path, target_skills: Path) -> list[Path]:
+    """Build a postorder cleanup plan only inside matching, sync-eligible skills.
+
+    Protected descendants keep their parent directories alive. Unrecognized
+    top-level files and directories are not managed by this synchronizer.
+    """
+    if not target_skills.exists():
+        return []
+    sources, _ = discover_skills(source_skills)
+    targets, _ = discover_skills(target_skills)
+    source_names = {p.name for p in sources}
+    plan: list[Path] = []
+
+    def walk(source: Path, target: Path) -> bool:
+        if protected_entry(target):
+            return False
+        present = source.exists() or source.is_symlink()
+        if target.is_dir():
+            removable = True
+            for child in sorted(target.iterdir()):
+                if not walk(source / child.name, child):
+                    removable = False
+            if not present and removable:
+                plan.append(target)
+                return True
+            return False
+        if not present and target.is_file():
+            plan.append(target)
+            return True
+        return False
+
+    for target in targets:
+        source = source_skills / target.name
+        # Target-only and source-excluded skills are never deletion candidates.
+        if target.name not in source_names:
+            continue
+        walk(source, target)
+    return plan
+
+
+def apply_deletions(paths: list[Path]) -> None:
+    """Remove only planned entries; rmdir refuses unexpected new descendants."""
+    for path in paths:
+        if protected_entry(path):
+            raise SyncError(f"删除计划中的路径类型已变化：{path}")
+        if path.is_dir():
+            path.rmdir()
+        else:
+            path.unlink()
 
 
 def has_skill_frontmatter(path: Path) -> bool:
@@ -154,6 +227,15 @@ def is_excluded_mcp_skill(path: Path) -> bool:
     return "mcp" in identity.casefold()
 
 
+def is_codex_only_skill(path: Path) -> bool:
+    """Match registered Codex-only identities without excluding portable workflows."""
+    name = path.stem if path.is_file() else path.name
+    if name in CODEX_ONLY_SKILLS:
+        return True
+    match = re.search(r"^name:\s*['\"]?([a-z0-9-]+)['\"]?\s*$", read_skill_frontmatter(path), re.MULTILINE)
+    return bool(match and match.group(1) in CODEX_ONLY_SKILLS)
+
+
 def discover_skills(skills_root: Path) -> tuple[list[Path], list[Path]]:
     skills: list[Path] = []
     excluded_skills: list[Path] = []
@@ -171,7 +253,7 @@ def discover_skills(skills_root: Path) -> tuple[list[Path], list[Path]]:
         )
         if not is_skill:
             continue
-        if is_excluded_mcp_skill(entry):
+        if is_excluded_mcp_skill(entry) or is_codex_only_skill(entry):
             excluded_skills.append(entry)
         else:
             skills.append(entry)
@@ -284,15 +366,26 @@ def main() -> int:
         if not skills:
             raise SyncError(f"未发现可同步技能：{source_skills_root}")
 
+        # Validate all writes and compute all deletions before mutating any target.
+        deletion_plans = {}
+        for label, target_root in targets:
+            for skill in skills:
+                sync_entry(skill, target_root / "skills" / skill.name, True)
+            sync_document(source_agents, target_root / target_document_name(label), True)
+            deletion_plans[label] = plan_deletions(source_skills_root, target_root / "skills") if args.delete else []
+
         mode = "预览" if args.dry_run else "执行"
         print(f"模式：{mode}")
         print(f"Codex 源：{args.codex_root}")
         print(f"发现技能：{len(skills)}")
+        print(f"同步方式：{'同名技能清理（保留目标独有技能）' if args.delete else '增量（保留目标独有项）'}")
         if excluded_skills:
             excluded_names = "、".join(skill.name for skill in excluded_skills)
-            print(f"排除 MCP 相关技能：{len(excluded_skills)}（{excluded_names}）")
+            print(f"排除技能（MCP 或 Codex 专属）：{len(excluded_skills)}（{excluded_names}）")
 
         for label, target_root in targets:
+            for path in deletion_plans[label]:
+                print(f"{label} 待删除：{path}")
             skill_counts = Counts()
             for skill in skills:
                 skill_destination = target_root / "skills" / skill.name
@@ -308,10 +401,12 @@ def main() -> int:
             document_status = sync_document(
                 source_agents, target_root / document_name, args.dry_run
             )
+            if not args.dry_run:
+                apply_deletions(deletion_plans[label])
             print(
                 f"{label}：{target_root} | "
                 f"技能新增 {skill_counts.created}、更新 {skill_counts.updated}、"
-                f"未变化 {skill_counts.unchanged} | {document_name} {document_status}"
+                f"未变化 {skill_counts.unchanged} | 删除项 {len(deletion_plans[label])} | {document_name} {document_status}"
             )
         return 0
     except (OSError, SyncError) as error:

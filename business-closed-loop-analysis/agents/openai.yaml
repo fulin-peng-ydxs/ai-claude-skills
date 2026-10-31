@@ -1,4 +1,4 @@
 interface:
   display_name: "业务闭环流程分析"
-  short_description: "基于代码还原业务闭环、数据权限、表结构和字段赋值机制"
-  default_prompt: "使用 $business-closed-loop-analysis 分析指定业务功能的完整闭环流程并生成事实文档。"
+  short_description: "面向开发者追踪业务闭环、数据权限、状态与字段生命周期"
+  default_prompt: "使用 $business-closed-loop-analysis 面向开发者分析指定业务目标从入口到终态的闭环，深入状态、权限、表关系、字段赋值和代码证据；按用户请求在对话交付或保存文档。"
