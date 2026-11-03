@@ -9,7 +9,7 @@ description: 生成或重构项目级 AI 通用约束文档，包括 AGENTS.md �
 
 本技能基于目标仓库事实创建或维护项目级 AI 协作说明，不承担业务开发、部署或全局协作规范编写。
 
-本文维护操作流程、协作边界和交付检查；[输出契约](references/output-contract.md) 维护内容取舍、产物参考结构、最低内容、项目条件内容和更新规则，[验证门禁](references/verification-gate.md) 维护命令验证及失败处理。检测和校验脚本提供辅助证据，不替代实际执行与语义核对。
+本文维护操作流程、协作边界和交付检查；[输出契约](references/output-contract.md) 维护内容取舍、固定结构、最低内容、项目条件内容和更新规则，[验证门禁](references/verification-gate.md) 维护命令验证及失败处理。检测和校验脚本提供辅助证据，不替代实际执行与语义核对。
 
 使用 `AGENTS.md` 作为项目级权威入口；`CLAUDE.md` 是 Claude Code 薄入口，指向权威规则和事实源，不复制完整规则。
 
@@ -49,9 +49,9 @@ description: 生成或重构项目级 AI 通用约束文档，包括 AGENTS.md �
 
 ## 产出边界与交付
 
-在用户指定的项目范围创建或更新 `AGENTS.md`、`CLAUDE.md`；只请求其中一份时不自动新增另一份，涉及另一份的同步缺口在交付中说明。产物采用输出契约的**参考结构**，技能正文的六类主题不作为项目文档的固定模板。
+在用户指定的项目范围创建或更新 `AGENTS.md`、`CLAUDE.md`；只请求其中一份时不自动新增另一份，涉及另一份的同步缺口在交付中说明。产物采用输出契约的固定模板，技能正文的六类主题不作为项目文档的固定模板。
 
-将以下分工落实到首次生成或获准补全的产物中；复用已有用途或范围说明，CLAUDE 薄入口可合并到权威规则入口。仅保存、逐字保存或局部更新时不为补边界扩写或重排，范围外缺口在交付中报告；这不免除正式入口的命令验证门禁。
+将以下分工落实到首次生成或获准补全的产物中；复用已有用途或范围说明，CLAUDE 薄入口使用所属固定模板。仅保存、逐字保存或局部更新时不为补边界扩写或重排，范围外缺口在交付中报告；这不免除正式入口的命令验证门禁。
 
 - `AGENTS.md`：维护所有 AI Agent 的项目级协作规则。
 - `CLAUDE.md`：只保留 Claude Code 入口指引、工作方式和适用的稳定记忆规则。
@@ -62,10 +62,10 @@ description: 生成或重构项目级 AI 通用约束文档，包括 AGENTS.md �
 
 ## 验证与完成标准
 
-文档校验器共用同级 `ai-constraint-doc-authoring/scripts/document_markdown.py` 解析 Markdown，专属字段与结构仍由各自校验器判断。安装或局部同步本技能时须同时提供该依赖；缺失时校验器明确报错，不回退到复制实现。修改共用解析器后运行 `python3 -m unittest discover -s <本技能目录>/tests -p 'test_*.py'`，测试需同级安装 README 和架构文档技能，以覆盖三个消费方。
+文档校验器复用同级 `skill-authoring-standard/scripts/validate_document_template.py`，其统一消费 `ai-constraint-doc-authoring/scripts/document_markdown.py`；结构从权威模板读取，不在脚本另写字段清单。安装或同步时同级提供两个依赖，缺失明确报错。修改共用解析器后运行 `python3 -m unittest discover -s <本技能目录>/tests -p 'test_*.py'`，测试需同级安装 README 和架构文档技能，以覆盖三个消费方。
 
 - 写入前确认适用命令门禁通过；写入后重读文件，核对规则归属、命令及其验证状态、事实来源和是否混入样例项目内容。
 - 检查入口能否引导后续 Agent 定位并选择事实源，检查链接及受标题变化影响的仓库内锚点；局部更新核对原有有效信息和确认状态没有被扩大或覆盖。
-- 运行 `scripts/validate_ai_constraint_docs.py <repo-root> --custom-structure --document <agents|claude|both>`，按本次交付范围选择文件；省略 `--document` 时兼容原有双文件校验，所选文件缺失仍报错，不为通过检查新增未授权文件。默认用 `--custom-structure` 检查正文、空章节、占位内容和 CLAUDE 薄入口边界，不要求二级标题；只有明确采用内置骨架时才省略该参数并检查固定标题与顺序。外部固定契约和最低内容另行核对。
+- 新建或整体重构后运行 `scripts/validate_ai_constraint_docs.py <repo-root> --document <agents|claude|both>`，仅检查实际交付文件，不为通过检查新增未授权文件。保存或旧文档局部更新保留基线，必要时使用 `--existing-structure`；这只检查基础格式，不证明固定模板合规。外部有效格式用 `--template <权威模板>`，英文固定译本同样指定其真实权威模板，不在脚本另维护标题清单。
 - 分别报告命令执行证据与文档校验结果；失败或必要验证未完成时保留实际状态，不宣称验收通过。
 - 单文件校验不代表另一份已通过；CLAUDE 指向的权威入口及其他事实源仍按链接检查核实，缺失或失效时报告缺口，不自动补建。

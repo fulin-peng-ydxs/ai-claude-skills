@@ -13,7 +13,7 @@
 | 技能目录 | 主要用途 |
 | --- | --- |
 | `ai-constraint-doc-authoring` | 生成或重构项目级 AI 通用约束文档，包括 AGENTS.md 与 CLAUDE.md。用于用户要求创建、更新、模板化、精简或校准仓库 AI 协作说明、Claude Code 入口、Codex 约束文档，并要求基于真实项目事实验证环境、测试、构建、本地启动命令后再落地的场景。 |
-| `ai-instruction-refactoring` | 精简、重构和规范 AI 约束文档、项目指令文档、AGENTS.md、CLAUDE.md、DESIGN.md、AI 工具全局/项目级记忆文档、Codex/Claude skills、自动化规则和提示词规范。用于用户要求简化、去冗余、去历史流水账、合并职责边界、整理文档关系、压缩技能说明，且必须保留最新事实、稳定执行约束和核心业务规则的场景。 |
+| `ai-instruction-refactoring` | 审查或精简 AI 约束文档、AGENTS.md、CLAUDE.md、DESIGN.md、全局或项目记忆、skills、自动化和提示词规范中的重复、过期内容及职责冲突，保留有效事实和执行契约；只审查时不修改文件。 |
 | `backend-memory-risk-analysis` | 分析一个项目的后端，尤其是 Java/Spring 服务中可能存在的内存溢出、内存泄漏和异常内存增长风险，并生成完整结构化报告；优先延续已有成果，无既有报告时默认输出到项目路径下的 `docs/check/memory/日期.md`。适用于需要检查后端代码中的静态持有、无限增长缓存、ThreadLocal 滞留、监听器或调度任务堆积、大对象缓冲、资源泄漏、队列堆积等内存风险场景；报告需包含风险证据、影响、触发条件、修复建议和处理进度状态。 |
 | `business-closed-loop-analysis` | 面向开发者，基于当前代码、数据结构和配置，还原一个业务目标从入口到终态的已实现闭环，深入角色、状态、权限、任务交接、表关系、字段赋值和消费口径；支持跨模块及多对象状态联动，不替代技术机制专题、未来需求设计或本次改动核查。 |
 | `business-feature-audit` | 对当前会话或当前 Git 工作区中本次开发涉及的代码做业务闭环核查，判断改动放回业务链路后是否成立，是否存在流程闭环、状态流转、上下游协同、权限、兼容性、数据一致性、异常处理、运营落地和前端业务承接遗漏；支持先基于 Git diff 和会话上下文输出快速业务风险结论，也支持在用户确认模块、范围和目录名后写入 `business-audit.md`。 |
@@ -28,7 +28,7 @@
 | `frontend-ux-audit` | 审核页面可观察的视觉、交互、状态反馈、控件必要性及原型实现偏差，用于体验检查、页面验收及体验问题修复后的复测。继承指定页面、当前改动或 diff 范围；独立全局审核未指定范围时覆盖可访问页面。只审核时不改代码；不承担代码重复治理、独立 DESIGN 合规判定或业务规则审核。 |
 | `git-commit-message-authoring` | 根据已确定的 Git 改动范围生成规范化提交消息：先确定文件范围，再读取改动摘要，生成提交文案后直接输出；仅在用户显式调用本技能时交互确认范围，否则自行确定范围且不提问；不执行 git add、git commit 或 git push。 |
 | `git-push` | 推送 Git 提交：先确定提交文件范围，再生成提交信息，随后按范围执行 git add、git commit，并在用户要求推送时执行 git push；仅在用户显式调用本技能时进行交互确认，否则自行完成各流程步骤。 |
-| `operation-workflow` | 执行服务器运维、故障排查、部署变更、服务器盘点、运维总览及单位手册维护，按前置检查、连接授权、方案授权、执行验证、工作汇报、人工审批及 Git 留痕闭环；仅讨论方案时不连接服务器或实施变更。 |
+| `operation-workflow` | 初始化运维工作空间、接入服务器、盘点服务，按命令策略及获批方案执行排障和变更，验证结果并维护手册与 Git 留痕。仅讨论或审查时不连接服务器。 |
 | `project-handover-analysis` | 基于源码、配置及构建部署材料评估完整项目或多仓交付包，生成指定版本的接手报告，说明系统全景、交付完整性、风险、阻塞和接手路径；不替代持续维护的技术专题、逐环节业务闭环或具体环境运维手册。 |
 | `project-module-architecture-doc-authoring` | 基于系统当前代码、配置与构建部署材料，生成或更新专一技术主题的事实文档；支持功能模块、平台子系统、系统架构、部署架构及特定技术机制解析。不替代逐环节业务闭环、项目接手评估或具体环境运维手册。 |
 | `project-readme-authoring` | 基于仓库事实生成、重构或局部更新 README.md，提供项目定位、最小运行与使用路径、开发入口和文档导航，命令复用 AI 约束文档编写技能维护的项目文档；适用于项目入口文档维护，不替代技术专题、业务闭环分析或项目接手评估。 |
@@ -37,7 +37,7 @@
 | `setup-dm-mcp` | 为当前项目注册达梦（DM）数据库 MCP 服务器。如项目已有 .codex-mcp/dm-db-mcp/run.sh 则直接复用；否则从技能模板自动创建完整实现（Java 源码 + run.sh）。连接参数直接写入 .mcp.json 的 env（不使用 ~/.codex/secrets），并更新 .claude/settings.json 免确认授权、执行 health_check 连接验证。适用于用户要求"注册 DM MCP"、"setup dm mcp"、"创建达梦数据库 mcp"等场景。 |
 | `setup-redis-mcp` | 为当前项目注册 Redis MCP 服务器。如项目已有 .codex-mcp/redis-mcp/run.sh 则直接复用；否则从技能模板自动创建完整实现（纯 Java 实现，零依赖，内置 RESP 协议）。连接参数直接写入 .mcp.json 的 env（不使用 ~/.codex/secrets），并更新 .claude/settings.json 免确认授权、执行 health_check 连接验证。适用于用户要求"注册 Redis MCP"、"setup redis mcp"、"创建 redis mcp"、"生成 redis mcp"等场景。 |
 | `setup-taos-mcp` | 为当前项目注册 TDengine（TaoS）时序数据库 MCP 服务器。如项目已有 .codex-mcp/taos-db-mcp/run.sh 则直接复用；否则从技能模板自动创建完整实现（Java 源码 + run.sh）。连接参数直接写入 .mcp.json 的 env（不使用 ~/.codex/secrets），并更新 .claude/settings.json 免确认授权、执行 health_check 连接验证。适用于用户要求"注册 TDengine MCP"、"setup taos mcp"、"创建 taos 数据库 mcp"等场景。 |
-| `skill-authoring-standard` | 创建或重构用户自有技能、统一技能名称时，规范英文标识与中文名称，以及职责边界、输入、执行流程、核心约束、输出与验证的默认结构。局部修改仅核对受影响内容；不替代产物模板技能的专用创建流程，不用于普通业务文档或未经要求批量重排现有技能。 |
+| `skill-authoring-standard` | 创建或重构用户自有技能、统一技能名称时，设计职责、执行流程、产物契约和验证方式。局部修改只检查受影响内容；不替代产物模板技能的专用创建流程，不用于普通业务文档或未经要求批量重排技能。 |
 | `system-disk-usage-analysis` | 分析本机或指定目录的磁盘使用情况，定位高占用目录和可清理目标，并输出带风险分级的结构化报告。用于磁盘空间不足、查找大文件或评估清理方案；不用于未经确认的删除操作。 |
 | `system-process-usage-analysis` | 分析本机当前进程的 CPU、内存、IO、线程和子进程分布，识别最可能导致卡顿或资源异常的进程并输出结构化报告。用于电脑卡顿、风扇高速、资源占用异常等排查；不用于未经确认地结束进程。 |
 

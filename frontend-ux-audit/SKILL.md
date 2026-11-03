@@ -75,3 +75,5 @@ description: 审核页面可观察的视觉、交互、状态反馈、控件必�
 ## 验证与完成标准
 
 核对问题均有可观察现象、位置、影响、建议与证据；按实际测到的页面和状态给结论，未实测不可当作不适用。已授权修复后复测，只有审核请求时不修改代码。
+
+完整报告或整体重构后运行 `python3 <skills-root>/skill-authoring-standard/scripts/validate_document_template.py <产物路径> --template <本技能目录>/references/output-template.md`；字段内容按同一模板核对，保存和局部更新不借格式检查重排全文。

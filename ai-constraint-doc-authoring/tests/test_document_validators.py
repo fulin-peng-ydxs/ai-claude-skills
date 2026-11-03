@@ -27,6 +27,18 @@ class DocumentValidatorsTest(unittest.TestCase):
                 SKILLS / 'ai-constraint-doc-authoring/scripts/document_markdown.py',
                 root / 'skills/ai-constraint-doc-authoring/scripts/document_markdown.py',
             )
+            engine = root / 'skills/skill-authoring-standard/scripts'
+            engine.mkdir(parents=True)
+            shutil.copy2(SKILLS / 'skill-authoring-standard/scripts/validate_document_template.py', engine / 'validate_document_template.py')
+            for skill in VALIDATORS:
+                references = root / 'skills' / skill / 'references'
+                references.mkdir()
+                shutil.copy2(SKILLS / skill / 'references/output-contract.md', references / 'output-contract.md')
+            sys.path.insert(0, str(SKILLS / 'skill-authoring-standard/scripts'))
+            import validate_document_template as templates
+            for skill in VALIDATORS:
+                contract = (SKILLS / skill / 'references/output-contract.md').read_text()
+                self.assertEqual([], templates.check_template(contract))
             for skill, script in VALIDATORS.items():
                 with self.subTest(skill=skill):
                     result = subprocess.run(

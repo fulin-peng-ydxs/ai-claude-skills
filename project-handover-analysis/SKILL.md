@@ -9,7 +9,7 @@ description: 基于源码、配置及构建部署材料评估完整项目或多�
 
 面向接手开发者或技术负责人，判断“交付了什么、能否构建运行、缺什么、先接手什么、怎样确认可维护”。报告是指定范围与时点的评估快照。
 
-本文维护分析流程与操作边界；[项目发现](references/project-discovery.md) 维护调研方法，[证据判定](references/evidence-completeness-security.md) 维护完整性、安全和质量要求，[报告模板](assets/project-handover-report-template.md) 统一维护默认骨架与最低内容。
+本文维护分析流程与操作边界；[项目发现](references/project-discovery.md) 维护调研方法，[证据判定](references/evidence-completeness-security.md) 维护完整性、安全和质量要求，[报告模板](assets/project-handover-report-template.md) 统一维护固定模板与最低内容。
 
 系统/部署架构及技术原理由 `project-module-architecture-doc-authoring` 维护，业务环节与字段、状态、权限明细由 `business-closed-loop-analysis` 维护，最小使用入口归 README。报告引用这些事实并评价接手影响，不复制整套正文；缺少专题时仍保留足以独立作出接手判断的上下文，不自动生成其他交付物。
 
@@ -35,7 +35,7 @@ description: 基于源码、配置及构建部署材料评估完整项目或多�
 
 ## 产出边界与交付
 
-默认一份完整项目级 Markdown 报告，采用报告模板的**默认骨架**，可按规模合并章节但保留适用判断与证据；用户要求摘要或专项范围时按其范围输出。
+默认一份完整项目级 Markdown 报告，章节、字段及内容验收统一由报告模板维护；用户要求摘要或专项范围时按其范围输出。
 
 路径依次选择用户指定位置、项目已有同类报告、`agent-works/architecture/project-handover-report.md`。同一报告修订维护原文件；明确要求新快照时保留旧成果。交付前清除模板占位符和生成提示。
 
@@ -47,3 +47,5 @@ description: 基于源码、配置及构建部署材料评估完整项目或多�
 - 沿环境准备、装配/启动、代表性业务操作、结果检查和失败定位走读；读者能判断下一步与通过条件。不可执行的步骤标明所需材料和未验证限制，不以走读代替实测。
 - 区分源码存在、可构建、可运行与可部署；区分仓库支持方案与实际环境。每个缺失结论满足预期证据、搜索范围和影响要求。
 - 检查路径、命令、版本、端口、API、表、配置、依赖方向及 Mermaid；摘要不复制专题正文，报告内证据和行动相互可定位，未完成验证如实披露。
+
+完整报告或整体重构后运行 `python3 <skills-root>/skill-authoring-standard/scripts/validate_document_template.py <产物路径> --template <本技能目录>/assets/project-handover-report-template.md`；字段内容按同一模板核对，保存和局部更新不借格式检查重排全文。

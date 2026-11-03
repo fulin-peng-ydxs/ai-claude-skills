@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "targets": [],
+  "approval_ref": null,
+  "default": "ask",
+  "deny": ["mkfs* **", "wipefs **", "dd **", "rm -rf /"],
+  "ask": [
+    "systemctl start **",
+    "systemctl stop **",
+    "systemctl restart **",
+    "systemctl reload **",
+    "docker --host unix:///var/run/docker.sock service update **",
+    "docker --host unix:///var/run/docker.sock stack deploy **"
+  ],
+  "allow": [
+    "id",
+    "hostname",
+    "uname -srmo",
+    "df -hPT",
+    "free -m",
+    "systemctl is-active *.service",
+    "systemctl show *.service --no-pager --property=ActiveState,SubState,MainPID",
+    "docker --host unix:///var/run/docker.sock ps",
+    "docker --host unix:///var/run/docker.sock service ls",
+    "docker --host unix:///var/run/docker.sock stack ls"
+  ]
+}

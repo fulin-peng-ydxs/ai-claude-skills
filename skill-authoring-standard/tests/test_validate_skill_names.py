@@ -17,6 +17,37 @@ SPEC.loader.exec_module(MODULE)
 
 
 class NamingTests(unittest.TestCase):
+    def test_vocabulary_is_loaded_from_the_authoritative_document(self):
+        source = MODULE.REFERENCE.read_text()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'naming.md'
+            path.write_text(source.replace('| `system` |', '| `database` |').replace('| `analysis` |', '| `inspection` |'))
+            domains, capabilities, exceptions, weak = MODULE.load_vocabulary(path)
+            self.assertIn('database', domains)
+            self.assertNotIn('system', domains)
+            self.assertIn('inspection', capabilities)
+            self.assertNotIn('analysis', capabilities)
+            self.assertEqual(MODULE.EXCEPTIONS, exceptions)
+            self.assertEqual(MODULE.WEAK_WORDS, weak)
+
+    def test_missing_or_invalid_vocabulary_fails_closed(self):
+        source = MODULE.REFERENCE.read_text()
+        bad_sources = [
+            source.replace('## 一级领域', '## 其他领域'),
+            source.replace('保留例外：', '旧词条：'),
+            source.replace('| `system` |', '| system |'),
+            source.replace('- 非规范缩写：`msg`、`dev`', '- 非规范缩写：`msg`、dev'),
+            source + '\n保留例外：`another-name`；重复定义\n',
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'naming.md'
+            for value in bad_sources:
+                path.write_text(value)
+                with self.assertRaises(ValueError):
+                    MODULE.load_vocabulary(path)
+            with self.assertRaises(OSError):
+                MODULE.load_vocabulary(Path(directory) / 'missing.md')
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)

@@ -4,21 +4,63 @@
 import argparse
 import re
 from pathlib import Path
+import sys
 
 import yaml
 
 
-CAPABILITIES = {
-    "authoring", "design", "analysis", "review", "audit", "refactoring",
-    "governance", "maintenance", "management", "sync", "workflow", "standard",
-}
-DOMAINS = {
-    "ai", "automation", "backend", "business", "code", "config", "design",
-    "development", "frontend", "git", "investment", "project", "requirement",
-    "skill", "system", "operation",
-}
-EXCEPTIONS = {"git-push"}
-WEAK_WORDS = {"auto", "smart", "advanced", "msg", "dev"}
+_parser_dir = Path(__file__).resolve().parents[2] / 'ai-constraint-doc-authoring/scripts'
+if not (_parser_dir / 'document_markdown.py').is_file():
+    raise SystemExit('Missing dependency: install ai-constraint-doc-authoring beside this skill.')
+sys.path.insert(0, str(_parser_dir))
+from document_markdown import fenced_lines, table_cells
+
+REFERENCE = Path(__file__).resolve().parents[1] / 'references/skill-naming.md'
+
+
+def load_vocabulary(path=REFERENCE):
+    """Read maintained vocabulary from the existing naming contract, failing closed."""
+    tables = {'一级领域': set(), '任务能力词': set()}
+    terms = {}
+    section = ''
+    for line, kind in fenced_lines(Path(path).read_text(encoding='utf-8')):
+        if kind != 'prose':
+            continue
+        if line.startswith('## '):
+            section = line[3:].strip()
+        if section in tables and line.startswith('|'):
+            cells = table_cells(line)
+            match = re.fullmatch(r'`([a-z]+)`', cells[0]) if cells else None
+            if cells and cells[0] not in {'一级领域', '能力词'} and not re.fullmatch(r':?-{3,}:?', cells[0]) and not match:
+                raise ValueError(f'命名规范词表条目格式无效：{section}')
+            if match:
+                if match[1] in tables[section]:
+                    raise ValueError(f'命名规范词表重复：{section}/{match[1]}')
+                tables[section].add(match[1])
+        for label in ['非规范缩写', '弱语义词', '保留例外']:
+            match = re.match(r'^(?:- )?' + label + r'：(.*?)(?:；|$)', line)
+            if match:
+                if label in terms:
+                    raise ValueError(f'命名规范词条重复：{label}')
+                if not re.fullmatch(r'\s*`[a-z0-9]+(?:-[a-z0-9]+)*`(?:[、，,]\s*`[a-z0-9]+(?:-[a-z0-9]+)*`)*\s*', match[1]):
+                    raise ValueError(f'命名规范词条格式无效：{label}')
+                values = re.findall(r'`([a-z0-9]+(?:-[a-z0-9]+)*)`', match[1])
+                if not values or len(values) != len(set(values)):
+                    raise ValueError(f'命名规范词条无效：{label}')
+                terms[label] = set(values)
+    for label, values in tables.items():
+        if not values:
+            raise ValueError(f'命名规范缺少有效词表：{label}')
+    for label in ['非规范缩写', '弱语义词', '保留例外']:
+        if label not in terms:
+            raise ValueError(f'命名规范缺少词条：{label}')
+    return tables['一级领域'], tables['任务能力词'], terms['保留例外'], terms['非规范缩写'] | terms['弱语义词']
+
+
+try:
+    DOMAINS, CAPABILITIES, EXCEPTIONS, WEAK_WORDS = load_vocabulary()
+except (OSError, ValueError) as error:
+    raise SystemExit(f'无法读取命名规范：{error}') from None
 
 
 def validate_skill(path):
