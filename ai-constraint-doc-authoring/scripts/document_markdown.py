@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import re
 
+FIELD_LINE = re.compile(r'^(?:- )?([^\n：:]+[：:])(.*)$')
+
 
 def table_cells(line: str) -> list[str]:
     """Split Markdown table cells, preserving escaped pipes in values."""
@@ -25,18 +27,29 @@ def table_cells(line: str) -> list[str]:
     return cells
 
 
-def fenced_lines(text: str):
-    """Classify lines using matching fence characters and opening fence length."""
+def fenced_lines(text: str, *, field_continuations: bool = False):
+    """Classify original lines, optionally relative to a field's continuation.
+
+    Template fields own a two-space continuation container. Remove that
+    container only for fence recognition; returned lines and offsets stay
+    unchanged so source records, ownership checks and diagnostics agree.
+    Normal Markdown callers keep the original document-relative behavior.
+    """
     fence = ""
+    in_field = False
     for line in text.splitlines():
+        if not fence and line.strip() and len(line) - len(line.lstrip(' ')) < 2:
+            in_field = field_continuations and bool(FIELD_LINE.match(line))
+        relative = line[2:] if in_field and line.startswith('  ') else line
         if fence:
-            if re.fullmatch(r" {0,3}" + re.escape(fence[0]) + "{" + str(len(fence)) + r",}[ \t]*", line):
+            within_container = not in_field or line.startswith('  ')
+            if within_container and re.fullmatch(r" {0,3}" + re.escape(fence[0]) + "{" + str(len(fence)) + r",}[ \t]*", relative):
                 fence = ""
                 yield line, "marker"
             else:
                 yield line, "code"
             continue
-        opening = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+        opening = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", relative)
         if opening and not (opening[1][0] == "`" and "`" in opening[2]):
             fence = opening[1]
             yield line, "marker"
@@ -44,9 +57,9 @@ def fenced_lines(text: str):
             yield line, "prose"
 
 
-def fences_closed(text: str) -> bool:
+def fences_closed(text: str, *, field_continuations: bool = False) -> bool:
     """Require explicit closing fences, using the same matching rules as parsing."""
-    return sum(kind == "marker" for _, kind in fenced_lines(text)) % 2 == 0
+    return sum(kind == "marker" for _, kind in fenced_lines(text, field_continuations=field_continuations)) % 2 == 0
 
 
 def parse_sections(text: str) -> tuple[list[str], list[tuple[str, str]]]:
@@ -76,13 +89,13 @@ def parse_sections(text: str) -> tuple[list[str], list[tuple[str, str]]]:
     return h1, [(title, "\n".join(body).strip()) for title, body in sections]
 
 
-def has_content(body: str) -> bool:
+def has_content(body: str, *, field_continuations: bool = False) -> bool:
     return any(
         line.strip() and (kind == "code" or not line.strip().startswith("#"))
-        for line, kind in fenced_lines(body)
+        for line, kind in fenced_lines(body, field_continuations=field_continuations)
         if kind != "marker"
     )
 
 
-def prose_without_fences(body: str) -> str:
-    return "\n".join(line for line, kind in fenced_lines(body) if kind == "prose")
+def prose_without_fences(body: str, *, field_continuations: bool = False) -> str:
+    return "\n".join(line for line, kind in fenced_lines(body, field_continuations=field_continuations) if kind == "prose")

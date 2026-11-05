@@ -38,6 +38,7 @@
 | `setup-redis-mcp` | 为当前项目注册 Redis MCP 服务器。如项目已有 .codex-mcp/redis-mcp/run.sh 则直接复用；否则从技能模板自动创建完整实现（纯 Java 实现，零依赖，内置 RESP 协议）。连接参数直接写入 .mcp.json 的 env（不使用 ~/.codex/secrets），并更新 .claude/settings.json 免确认授权、执行 health_check 连接验证。适用于用户要求"注册 Redis MCP"、"setup redis mcp"、"创建 redis mcp"、"生成 redis mcp"等场景。 |
 | `setup-taos-mcp` | 为当前项目注册 TDengine（TaoS）时序数据库 MCP 服务器。如项目已有 .codex-mcp/taos-db-mcp/run.sh 则直接复用；否则从技能模板自动创建完整实现（Java 源码 + run.sh）。连接参数直接写入 .mcp.json 的 env（不使用 ~/.codex/secrets），并更新 .claude/settings.json 免确认授权、执行 health_check 连接验证。适用于用户要求"注册 TDengine MCP"、"setup taos mcp"、"创建 taos 数据库 mcp"等场景。 |
 | `skill-authoring-standard` | 创建或重构用户自有技能、统一技能名称时，设计职责、执行流程、产物契约和验证方式。局部修改只检查受影响内容；不替代产物模板技能的专用创建流程，不用于普通业务文档或未经要求批量重排技能。 |
+| `skill-creator` | 创建或更新 Codex 技能，编写适用场景清晰的 `SKILL.md`，并按需组织参考文档、脚本和资源；支持初始化和基础校验，不替代技能设计规范或专项模板技能。 |
 | `system-disk-usage-analysis` | 分析本机或指定目录的磁盘使用情况，定位高占用目录和可清理目标，并输出带风险分级的结构化报告。用于磁盘空间不足、查找大文件或评估清理方案；不用于未经确认的删除操作。 |
 | `system-process-usage-analysis` | 分析本机当前进程的 CPU、内存、IO、线程和子进程分布，识别最可能导致卡顿或资源异常的进程并输出结构化报告。用于电脑卡顿、风扇高速、资源占用异常等排查；不用于未经确认地结束进程。 |
 

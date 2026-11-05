@@ -57,6 +57,7 @@ def filled(skeleton):
     """Create syntax fixtures only, never represent these as verified project reports."""
     out = skeleton
     out = re.sub(r' <!-- repeat(?:-required)? -->', '', out)
+    out = out.replace(' <!-- flexible-body -->', '')
     out = re.sub(r'^(`{3,}|~{3,})text verbatim$', r'\1text', out, flags=re.M)
     out = check.PLACEHOLDER.sub('样例1', out)
     lines = out.splitlines()
@@ -68,6 +69,321 @@ def filled(skeleton):
 
 
 class FixedDocumentTests(unittest.TestCase):
+    def test_operation_templates_reserve_recovery_and_listening_facts(self):
+        source = (ROOT / 'operation-workflow/references/output-templates.md').read_text()
+        blocks = check.template_blocks(source)
+        unit = filled(blocks['unit'])
+        recovery = '- 备份与恢复现状：样例1'
+        # Unknown recovery stays explicit and may use a field-owned table.
+        detailed = unit.replace(recovery, '- 备份与恢复现状：\n\n'
+                                '  | 对象 | 证据与缺口 |\n  | --- | --- |\n'
+                                '  | 测试数据 | 未核实：备份责任人及演练未知 |\n')
+        self.assertEqual([], check.validate(detailed, source, 'unit'))
+        self.assertTrue(check.validate(unit.replace(recovery, ''), source, 'unit'))
+        index = filled(blocks['index'])
+        self.assertEqual([], check.validate(index, source, 'index'))
+        self.assertTrue(check.validate(index.replace('- 监听与访问边界：样例1', ''), source, 'index'))
+        self.assertTrue(check.validate(index.replace('版本 / 基础状态', '实时业务健康'), source, 'index'))
+
+    def test_owned_code_fences_use_field_relative_indentation(self):
+        source = (ROOT / 'operation-workflow/references/output-templates.md').read_text()
+        good = filled(check.template_blocks(source)['unit'])
+        field = '- 精确命令与步骤：样例1'
+        for indent in [2, 3, 4, 5]:
+            for fence in ['```', '~~~~']:
+                for inline in ['', '仅为隔离格式样例，未执行。']:
+                    with self.subTest(indent=indent, fence=fence, inline=inline):
+                        pad = ' ' * indent
+                        opening = field.replace('样例1', inline) + '\n\n' + pad + fence + 'bash\n'
+                        body = pad + 'printf example\n'
+                        closing = pad + fence + '\n'
+                        closed = good.replace(field, opening + body + closing, 1)
+                        self.assertEqual([], check.validate(closed, source, 'unit'))
+                        broken = good.replace(field, opening + body, 1)
+                        errors = check.validate(broken, source, 'unit')
+                        self.assertTrue(any('unclosed code fence' in error for error in errors), errors)
+                        empty = good.replace(field, opening + closing, 1)
+                        self.assertTrue(check.validate(empty, source, 'unit'))
+        # A fixed code block inside a field uses the same relative fence view.
+        declared = '````document-template\n# 命令\n- 步骤：{{@说明}}\n\n    ```bash\n    {{@命令}}\n    ```\n````'
+        closed = '# 命令\n- 步骤：静态样例。\n\n    ```bash\n    printf example\n    ```\n'
+        self.assertEqual([], check.validate(closed, declared))
+        wrapper = '- 精确命令与步骤：\n\n    `````text\n    ```document-template\n    # 未授权模板包装\n    ```\n    `````\n'
+        self.assertTrue(check.validate(good.replace(field, wrapper, 1), source, 'unit'))
+
+    def test_all_code_blocks_need_a_declared_location_without_fixed_code(self):
+        source = (ROOT / 'operation-workflow/references/output-templates.md').read_text()
+        good = filled(check.template_blocks(source)['unit'])
+        diagram = '```mermaid\nflowchart LR\n  A --> B\n```\n'
+        for indent in [0, 1]:
+            block = ''.join(' ' * indent + line + '\n' for line in diagram.splitlines())
+            before = good.replace('## 1. 单位范围与运行事实\n', '## 1. 单位范围与运行事实\n\n' + block, 1)
+            between = good.replace('- 成员、环境与版本：', block + '- 成员、环境与版本：', 1)
+            after = good + '\n' + block
+            for text in [before, between, after]:
+                with self.subTest(indent=indent, document=text):
+                    self.assertTrue(check.validate(text, source, 'unit'))
+        nested = ''.join('    ' + line + '\n' for line in diagram.splitlines())
+        inside = good.replace('- 成员、环境与版本：样例1', '- 成员、环境与版本：\n\n' + nested, 1)
+        self.assertEqual([], check.validate(inside, source, 'unit'))
+        free = '```document-template\n# 机制\n## 说明\n{{@完整机制}}\n```'
+        self.assertEqual([], check.validate('# 机制\n## 说明\n' + diagram, free))
+
+    def test_field_slots_accept_tables_diagrams_and_block_only_values(self):
+        source = '````document-template\n# 单位\n\n## 事实\n- 成员：{{@实际成员}}\n- 验证：{{@实际状态}}\n````'
+        table = '  | unit-id | server-id |\n  | --- | --- |\n  | test-unit | test-server |\n'
+        diagram = '  ```mermaid\n  flowchart LR\n    Server --> Unit\n  ```\n'
+        command = '  ```bash\n  printf example\n  ```\n'
+        for content in [table, diagram, command, table + '\n' + diagram + '\n' + command]:
+            for inline in ['', '以下内容仅为隔离格式样例。']:
+                with self.subTest(content=content, inline=inline):
+                    document = '# 单位\n\n## 事实\n- 成员：' + inline + '\n\n' + content + '\n- 验证：未实测。\n'
+                    self.assertEqual([], check.validate(document, source))
+        # Plain fixed fields use the same continuation contract as list fields.
+        plain_source = source.replace('- 成员：', '成员：').replace('- 验证：', '验证：')
+        plain = '# 单位\n\n## 事实\n成员：\n\n' + table + '\n验证：未实测。\n'
+        self.assertEqual([], check.validate(plain, plain_source))
+
+    def test_standalone_slots_accept_mixed_blocks_between_fixed_anchors(self):
+        source = '''````document-template
+# 对照
+## 正文
+开始说明。
+{{@前置分析}}
+| 固定对象 | 固定结果 |
+| --- | --- |
+| R1 | {{@结果}} |
+{{@补充分析}}
+结束说明。
+````'''
+        extra = '| 路径 | 用途 |\n| --- | --- |\n| /example | 隔离样例 |\n'
+        required = '| 固定对象 | 固定结果 |\n| --- | --- |\n| R1 | 未执行 |\n'
+        diagram = '```mermaid\nflowchart LR\n  A --> B\n```\n'
+        document = '# 对照\n## 正文\n开始说明。\n' + extra + '\n' + required + diagram + extra + '结束说明。\n'
+        self.assertEqual([], check.validate(document, source))
+        self.assertTrue(check.validate(document.replace(required, ''), source))
+        self.assertTrue(check.validate(document.replace('结束说明。\n', '结束说明。\n' + extra), source))
+        self.assertEqual([], check.validate(document.replace('结束说明。', '结束：固定说明。'), source.replace('结束说明。', '结束：固定说明。')))
+        self.assertTrue(check.validate(document.replace('结束说明。\n', '结束：固定说明。\n' + extra), source.replace('结束说明。', '结束：固定说明。')))
+        free = '```document-template\n# 机制\n## 说明\n{{@完整机制}}\n```'
+        self.assertEqual([], check.validate('# 机制\n## 说明\n背景：隔离样例。\n' + extra + diagram, free))
+
+    def test_content_tables_do_not_replace_or_reorder_declared_tables(self):
+        source = '''````document-template
+# 对照
+## 事实
+- 分析：{{@实际分析}}
+| 固定对象 | 结果 |
+| --- | --- |
+| A | {{@结果}} |
+| B | {{@结果}} |
+- 证据：{{@证据}}
+| 验收 | 状态 |
+| --- | --- |
+| C | {{@状态}} |
+````'''
+        first = '| 固定对象 | 结果 |\n| --- | --- |\n| A | 未执行 |\n| B | 未执行 |\n'
+        second = '| 验收 | 状态 |\n| --- | --- |\n| C | 未执行 |\n'
+        nested = '  | 对象 | 属性 |\n  | --- | --- |\n  | 服务 | 版本未知 |\n'
+        prefix = '# 对照\n## 事实\n- 分析：隔离样例。\n' + nested + '\n'
+        document = prefix + first + '- 证据：尚未采集。\n' + second
+        self.assertEqual([], check.validate(document, source))
+        variants = [document.replace(first, ''),
+                    document.replace(first, ''.join('  ' + line + '\n' for line in first.splitlines())),
+                    document.replace(first, first.replace('| A | 未执行 |\n', '')),
+                    document.replace(first, first.replace('| A | 未执行 |\n| B | 未执行 |', '| B | 未执行 |\n| A | 未执行 |')),
+                    document.replace(first, first.replace('| 固定对象 | 结果 |', '| 对象 | 结果 |')),
+                    document.replace(first, first + first),
+                    prefix + second + '- 证据：尚未采集。\n' + first]
+        for document in variants:
+            with self.subTest(document=document):
+                self.assertTrue(check.validate(document, source))
+
+    def test_declared_tables_inside_field_values_remain_required(self):
+        source = '```document-template\n# 事实\n- 清单：{{@说明}}\n\n  | 成员 | 状态 |\n  | --- | --- |\n  | S1 | {{@状态}} |\n- 验证：{{@结果}}\n```'
+        extra = '  | 路径 | 用途 |\n  | --- | --- |\n  | /example | 隔离样例 |\n'
+        required = '  | 成员 | 状态 |\n  | --- | --- |\n  | S1 | 未执行 |\n'
+        document = '# 事实\n- 清单：隔离样例。\n' + extra + '\n' + required + '- 验证：待核实。\n'
+        self.assertEqual([], check.validate(document, source))
+        self.assertTrue(check.validate(document.replace(required, ''), source))
+        self.assertTrue(check.validate(document.replace(required, required + '\n' + required), source))
+
+    def test_slot_tables_keep_syntax_empty_reason_and_outer_field_checks(self):
+        source = '````document-template\n# 事实\n## 说明\n- 清单：{{@内容}}\n- 证据：{{@来源}}\n````'
+        table = '  | 对象 | 结果 |\n  | --- | --- |\n  | 服务 | 未执行 |\n'
+        document = '# 事实\n## 说明\n- 清单：\n\n' + table + '- 证据：隔离样例。\n'
+        self.assertEqual([], check.validate(document, source))
+        empty = table[:table.index('  | 服务 |')]
+        self.assertEqual([], check.validate(document.replace(table, empty + '  条目情况：无：已检查，尚无对象。\n'), source))
+        for bad in [document.replace('  | 服务 | 未执行 |', '  | 服务 |'),
+                    document.replace('  | 服务 | 未执行 |', '  | 服务 | |'),
+                    document.replace(table, empty), document.replace(table, ''),
+                    document.replace(table, empty + '条目情况：无：不属于该字段的说明。\n'),
+                    document.replace('- 证据：隔离样例。\n', ''),
+                    document.replace('- 证据：', '- 自定义字段：越界。\n- 证据：'),
+                    document + '\n## 新增章节\n越界。\n',
+                    document.replace('未执行', '{{@未填}}'),
+                    document.replace('- 清单：', '- 清单：\n  ```mermaid\n  flowchart LR\n    A --> B')]:
+            with self.subTest(document=bad):
+                self.assertTrue(check.validate(bad, source))
+        self.assertTrue(check.validate(document.replace(table, '\n'.join(line[1:] for line in table.splitlines()) + '\n'), source))
+
+    def test_content_table_separators_follow_the_header_width(self):
+        source = '```document-template\n# 对照\n## 说明\n{{@完整说明}}\n```'
+        one = '# 对照\n## 说明\n| 成员 |\n| --- |\n| S1 |\n'
+        self.assertEqual([], check.validate(one, source))
+        two = '# 对照\n## 说明\n| 成员 | 状态 |\n| --- | --- |\n| S1 | 未执行 |\n'
+        self.assertEqual([], check.validate(two, source))
+        for separator in ['| --- |', '| --- | --- | --- |']:
+            self.assertTrue(check.validate(two.replace('| --- | --- |', separator), source))
+        declared = '```document-template\n# 对照\n| 成员 | 状态 |\n| --- |\n| S1 | {{@状态}} |\n```'
+        self.assertTrue(check.check_template(declared))
+
+    def test_slot_code_does_not_change_declared_code_or_verbatim_exemptions(self):
+        source = '````document-template\n# 记录\n- 分析：{{@分析}}\n\n```text verbatim\n{{@原文}}\n```\n````'
+        diagram = '  ```mermaid\n  flowchart LR\n    A --> B\n  ```\n'
+        raw = '原文中的 {{@示例}} 与 <!-- repeat -->'
+        original = '```text\n' + raw + '\n```\n'
+        document = '# 记录\n- 分析：格式样例。\n\n' + diagram + original
+        self.assertEqual([], check.validate(document, source))
+        for bad in [document.replace(original, ''), document + original,
+                    document.replace('    A --> B', '    {{@图待填}}'),
+                    document.replace('  ```mermaid', '  ```text verbatim'),
+                    document.replace('  flowchart LR\n    A --> B\n', ''),
+                    document.replace(raw, '{{@原文}}')]:
+            with self.subTest(document=bad):
+                self.assertTrue(check.validate(bad, source))
+
+    def test_real_operation_unit_slot_can_hold_the_inventory_table(self):
+        source = (ROOT / 'operation-workflow/references/output-templates.md').read_text()
+        good = filled(check.template_blocks(source)['unit'])
+        table = '\n\n  | unit-id | server-id | 版本 |\n  | --- | --- | --- |\n  | test-unit | test-server | 未核实 |\n'
+        document = good.replace('- 成员、环境与版本：样例1', '- 成员、环境与版本：隔离格式样例。' + table)
+        self.assertEqual([], check.validate(document, source, 'unit'))
+
+    def test_declared_nested_code_is_not_swallowed_by_its_field_slot(self):
+        source = '````document-template\n# 操作\n- 步骤：{{@说明}}\n\n  ```bash\n  {{@精确命令}}\n  ```\n- 验证：{{@结果}}\n````'
+        declared = '  ```bash\n  printf example\n  ```\n'
+        diagram = '  ```mermaid\n  flowchart LR\n    A --> B\n  ```\n'
+        document = '# 操作\n- 步骤：隔离格式样例。\n\n' + diagram + declared + '- 验证：未实测。\n'
+        self.assertEqual([], check.validate(document, source))
+        self.assertTrue(check.validate(document.replace(declared, ''), source))
+        self.assertTrue(check.validate(document.replace(declared, declared + declared), source))
+        self.assertTrue(check.validate(document.replace('  ```bash', '  ```text'), source))
+
+    def test_literal_anchors_disambiguate_identical_headers_and_code_languages(self):
+        source = '''````document-template
+# 对照
+## 正文
+{{@分析}}
+以下是固定结果。
+| 对象 | 结果 |
+| --- | --- |
+| R1 | {{@结果}} |
+```bash
+{{@固定命令}}
+```
+````'''
+        extra = '| 对象 | 结果 |\n| --- | --- |\n| 临时对照 | 仅说明 |\n\n```bash\nprintf content\n```\n'
+        required = '| 对象 | 结果 |\n| --- | --- |\n| R1 | 未执行 |\n```bash\nprintf required\n```\n'
+        document = '# 对照\n## 正文\n' + extra + '以下是固定结果。\n' + required
+        self.assertEqual([], check.validate(document, source))
+        self.assertTrue(check.validate(document.replace(required, ''), source))
+
+    def test_fixed_business_fields_allow_rich_explanation_and_still_reject_omissions(self):
+        cases = [
+            ('requirement-closure-design/references/closure-template.md', '功能点：', '前置、操作与反馈'),
+            ('requirement-doc-authoring/references/requirement-template.md', 'R', '输入、操作与校验'),
+            ('development-workflow/references/output-template.md', 'T', '实施方案'),
+            ('project-module-architecture-doc-authoring/references/output-contract.md', '机制：', '处理与结果'),
+            ('business-closed-loop-analysis/references/output-contract.md', '环节：', '处理与校验'),
+            ('project-handover-analysis/assets/project-handover-report-template.md', '链路：', '调用与交接'),
+        ]
+        def find(node, prefix):
+            for child in node.children:
+                if child.title.startswith(prefix):
+                    return child
+                found = find(child, prefix)
+                if found:
+                    return found
+        for path, prefix, field in cases:
+            with self.subTest(template=path):
+                source = (ROOT / path).read_text()
+                skeleton = check.template_blocks(source)['document']
+                good = filled(skeleton)
+                original = f'- {field}：样例1'
+                self.assertIn(original, good)
+                expanded = f'''- {field}：隔离格式样例，不代表实际项目事实。
+  1. 校验身份和必填项后提交；缺项时保留原内容并提示原因，检查状态不变。
+  2. 更新状态并创建唯一任务；失败时回滚，重复请求返回原结果，判据是只产生一个任务。尚未运行验证。
+  ```mermaid
+  flowchart LR
+    A[草稿] --> B[待审核与唯一任务]
+  ```'''
+                document = good.replace(original, expanded, 1)
+                self.assertEqual([], check.validate(document, source))
+                self.assertEqual([], check.validate(good.replace(original, f'- {field}：未知：缺少接口或源码依据，影响判断；补齐后再复核。', 1), source))
+                unit = find(check.parse_tree(skeleton, True), prefix)
+                self.assertIsNotNone(unit)
+                for line in unit.body:
+                    match = check.FIELD.match(line)
+                    if match and check.PLACEHOLDER.search(match[2]):
+                        missing = re.sub(r'^(?:- )?' + re.escape(match[1]) + r'.*\n', '', good, count=1, flags=re.M)
+                        self.assertTrue(good != missing, match[1])
+                        self.assertTrue(check.validate(missing, source), match[1])
+                self.assertTrue(check.validate(document.replace(expanded, expanded + '\n##### 临时子标题\n额外内容。', 1), source))
+                self.assertTrue(check.validate(document.replace(expanded, expanded + '\n| 临时列 | 内容 |\n| --- | --- |\n| A | B |', 1), source))
+
+    def test_skill_body_allows_useful_local_structure_inside_fixed_topics(self):
+        source = (ROOT / 'skill-authoring-standard/references/skill-template.md').read_text()
+        good = filled(check.template_blocks(source)['document'])
+        good = good.replace('## 执行流程\n\n样例1', '''## 执行流程
+
+### 模式选择
+
+| 请求 | 下一步 | 失败出口 |
+| --- | --- | --- |
+| 仅保存已有成果 | 核对基线后保存 | 基线不明时等待选择 |
+
+### 生成步骤
+
+#### 读取依据
+
+先读取已确认输入，缺失时标明影响。
+''')
+        self.assertEqual([], check.validate(good, source))
+        # Retain the outer contract while allowing an entire topic to use subsections.
+        self.assertTrue(check.validate(good.replace('## 职责与边界\n\n样例1\n\n', ''), source))
+        self.assertTrue(check.validate(good.replace('## 输入与前置条件', '## 临时替代主题'), source))
+        self.assertTrue(check.validate(good.replace('## 输入与前置条件', '## 核心约束'), source))
+        self.assertTrue(check.validate(good + '\n## 未声明主题\n正文\n', source))
+        reordered = good.replace('## 核心约束', '## 交换主题').replace('## 产出边界与交付', '## 核心约束').replace('## 交换主题', '## 产出边界与交付')
+        self.assertTrue(check.validate(reordered, source))
+        for broken in (
+            good.replace('### 模式选择', '#### 模式选择'),
+            good.replace('### 生成步骤', '### 模式选择'),
+            good.replace('先读取已确认输入，缺失时标明影响。', ''),
+            good.replace('核对基线后保存 | 基线不明时等待选择', '核对基线后保存'),
+            good.replace('### 模式选择', '### 模式选择 <!-- flexible-body -->'),
+            good.replace('先读取已确认输入，缺失时标明影响。', '{{@未填写}}'),
+            good + '\n```bash\n未闭合代码',
+        ):
+            with self.subTest(broken=broken):
+                self.assertTrue(check.validate(broken, source))
+
+    def test_flexible_slots_do_not_relax_undeclared_report_structure(self):
+        self.assertTrue(check.validate(GOOD.replace('## 结论与范围', '## 结论与范围\n### 临时子标题\n说明'), CONTRACT))
+        self.assertTrue(check.validate(GOOD + '\n### 临时表格\n| 列 | 值 |\n| --- | --- |\n| A | B |\n', CONTRACT))
+        self.assertTrue(check.validate(GOOD.replace('- 结论：', '- 临时字段：额外内容\n- 结论：'), CONTRACT))
+        self.assertTrue(check.validate(GOOD.replace('| 场景 | 结果 | 证据 |', '| 场景 | 临时列 | 证据 |'), CONTRACT))
+        source = '```document-template\n# 名称\n## 自由内容 <!-- flexible-body -->\n{{@内容}}\n```'
+        self.assertEqual([], check.check_template(source))
+        for body in ('{{@内容}}\n### 固定子节\n{{@说明}}', '- 字段：{{@内容}}',
+                     '| 列 | 值 |\n| --- | --- |\n| {{@列}} | {{@值}} |',
+                     '{{@内容}}\n~~~bash\necho fixed\n~~~'):
+            with self.subTest(body=body):
+                self.assertTrue(check.check_template(source.replace('{{@内容}}', body)))
+
     def test_requirement_goal_absence_cannot_waive_missing_integration_acceptance(self):
         source = (ROOT / 'requirement-doc-authoring/references/requirement-template.md').read_text()
         good = filled(check.template_blocks(source)['document'])
@@ -277,20 +593,194 @@ class FixedDocumentTests(unittest.TestCase):
         snippet = '### 共用筛选状态\n- 现状与依据：已比较两处。\n- 判断与边界：复用已有入口。\n- 消费方与处理：迁移两处。\n- 验证与维护：安排回归。\n\n'
         self.assertTrue(check.validate(good.replace('## 3. 验收与交付', snippet + '## 3. 验收与交付'), source))
 
-    def test_operation_record_keeps_all_three_literal_sources(self):
+    def test_operation_workflow_command_rule_fragments_resolve_to_real_sections(self):
+        skill = ROOT / 'operation-workflow/SKILL.md'
+        references = re.findall(r'\]\((references/command-policy\.md)#([^)]*)\)', skill.read_text())
+        self.assertTrue(references)
+        for relative, fragment in references:
+            tree = check.parse_tree((skill.parent / relative).read_text())
+            nodes, headings = [tree], set()
+            while nodes:
+                node = nodes.pop()
+                headings.add(node.title)
+                nodes.extend(node.children)
+            # These Chinese fragments directly name headings; use the shared
+            # Markdown parser so code-fence content cannot satisfy the route.
+            self.assertIn(fragment, headings, relative + '#' + fragment)
+
+    def test_operation_review_and_evidence_are_separate_contracts(self):
         source = (ROOT / 'operation-workflow/references/output-templates.md').read_text()
-        skeleton = check.template_blocks(source)['record']
-        skeleton = skeleton.replace('```text verbatim', '`````text')
+        blocks = check.template_blocks(source)
+        self.assertEqual({'access', 'index', 'unit', 'record', 'execution'}, set(blocks))
+        review = filled(blocks['record'])
+        for field in ['- 待办与决定：样例1\n', '- 异常与未验证：样例1\n', '- 人工决定：样例1\n',
+                      '- 影响：样例1\n', '- 备份与回退：样例1\n', '- 验证标准：样例1\n',
+                      '- 结果与证据：样例1\n']:
+            self.assertTrue(check.validate(review.replace(field, '', 1), source, 'record'))
+        # Raw input can contain template-like text without changing the contract.
+        skeleton = blocks['execution'].replace('```text verbatim', '`````text')
         skeleton = re.sub(r'^```$', '`````', skeleton, flags=re.M)
-        raw = ['用户输入中的 {{@示例}}\n```document-template\n# 示例\n```',
-               '批准原文\n<!-- repeat -->\nTODO: 原始待办',
-               '汇报原文\n## 内部标题\n{{@尚未完成的示例}}']
-        values = iter(['隔离需求来源及哈希', raw[0], '隔离批准来源及哈希', raw[1], '隔离汇报来源及哈希', raw[2]])
-        document = check.PLACEHOLDER.sub(lambda _: next(values), skeleton)
-        self.assertEqual([], check.validate(document, source, 'record'))
-        for text in raw:
-            self.assertIn(text, document)
-        self.assertNotIn('text verbatim', document)
+        raw = '批准S01/v1限定检查\n{{@原始示例}}\n```document-template\n# 原文\n```\n<!-- repeat -->'
+        document = check.PLACEHOLDER.sub(
+            lambda m: raw if '实际需求或决定原文' in m[0] else '隔离样例1', skeleton)
+        document = re.sub(r' <!-- repeat(?:-required)? -->', '', document)
+        self.assertEqual([], check.validate(document, source, 'execution'))
+        self.assertIn(raw, document)
+        for field in ['- 来源与范围：隔离样例1\n', '- 方案与授权：隔离样例1\n',
+                      '- 执行结果：隔离样例1\n', '- 关键证据：隔离样例1\n']:
+            self.assertTrue(check.validate(document.replace(field, '', 1), source, 'execution'))
+
+    def test_operation_versions_and_units_repeat_without_detaching_decisions(self):
+        # Structural repetition only; this does not prove navigation or source semantics.
+        source = (ROOT / 'operation-workflow/references/output-templates.md').read_text()
+        for block, marker, finish, fields in [
+            ('record', '### 方案：', '## 3. 验收与归档', ('前提与范围', '变更与步骤')),
+            ('execution', '### 操作：', '## 3. 需求与决定来源', ('命令与参数', '执行结果')),
+        ]:
+            with self.subTest(block=block):
+                document = filled(check.template_blocks(source)[block])
+                begin, end = document.index(marker), document.index(finish)
+                unit = document[begin:end]
+                first = unit.replace(marker + '样例1', marker + 'S01/v1', 1)
+                second = unit.replace(marker + '样例1', marker + 'S01/v2', 1)
+                combined = document[:begin] + first + second + document[end:]
+                self.assertEqual([], check.validate(combined, source, block))
+                duplicated = document[:begin] + first + first + document[end:]
+                self.assertTrue(check.validate(duplicated, source, block))
+                a, b = fields
+                reordered = combined.replace(f'- {a}：样例1\n- {b}：样例1',
+                                             f'- {b}：样例1\n- {a}：样例1', 1)
+                self.assertTrue(check.validate(reordered, source, block))
+                required = '人工决定' if block == 'record' else '方案与授权'
+                detached = document[:begin] + first + second.replace(f'- {required}：样例1\n', '', 1) + document[end:]
+                self.assertTrue(check.validate(detached, source, block))
+
+    def test_operation_review_tables_preserve_navigation_and_separate_archive_states(self):
+        source = (ROOT / 'operation-workflow/references/output-templates.md').read_text()
+        blocks = check.template_blocks(source)
+        for block, header in [
+            ('record', '| 方案版本与详情 | 整体批准 | 执行与验证 | 操作入口 |'),
+            ('record', '| 事项 | 当前状态与范围 | 来源或证据 |'),
+            ('execution', '| 核对项 | 预期 | 实际与判定 | 证据入口 |'),
+        ]:
+            with self.subTest(block=block, header=header):
+                document = filled(blocks[block])
+                self.assertEqual([], check.validate(document, source, block))
+                self.assertIn(header, document)
+                begin = document.index(header)
+                end = document.find('\n\n', begin)
+                if end == -1:
+                    end = len(document)
+                self.assertTrue(check.validate(document[:begin] + document[end:], source, block))
+                self.assertTrue(check.validate(document.replace(header, header.replace(' |', '', 1)), source, block))
+        review = filled(blocks['record'])
+        for item in ['结果确认', '归档批准', '索引检查', '本地提交', '推送']:
+            with self.subTest(item=item):
+                row = f'| {item} | 样例1 | 样例1 |\n'
+                self.assertIn(row, review)
+                self.assertTrue(check.validate(review.replace(row, ''), source, 'record'))
+        detail = filled(blocks['execution'])
+        self.assertTrue(check.validate(detail.replace('| 样例1 | 样例1 | 样例1 | 样例1 |',
+                                                     '| 样例1 | 样例1 | | 样例1 |'), source, 'execution'))
+
+    def test_operation_without_execution_keeps_unknown_and_rejected_states(self):
+        source = (ROOT / 'operation-workflow/references/output-templates.md').read_text()
+        blocks = check.template_blocks(source)
+        evidence = filled(blocks['execution'])
+        begin = evidence.index('### 操作：')
+        end = evidence.index('## 3. 需求与决定来源')
+        absence = '条目情况：无：未执行，等待明确批准或补齐权限。\n\n'
+        for state in ['待批准', '拒绝本版方案', '未知：权限不可用']:
+            with self.subTest(state=state):
+                review = filled(blocks['record']).replace('- 人工决定：样例1', '- 人工决定：' + state)
+                review = review.replace('- 结果与证据：样例1', '- 结果与证据：未执行；缺批准或必要权限。')
+                pending = evidence[:begin] + absence + evidence[end:]
+                pending = pending.replace('- 策略依据：样例1', '- 策略依据：命令allow，仅免逐条询问；整体变更方案仍按人工决定字段判断。')
+                pending = pending.replace('```text\n样例1\n```', '```text\n' + state + '\n```', 1)
+                self.assertEqual([], check.validate(review, source, 'record'))
+                self.assertEqual([], check.validate(pending, source, 'execution'))
+                self.assertTrue(check.validate(pending.replace(absence, ''), source, 'execution'))
+
+    def test_operation_plan_does_not_require_a_precomputed_command_list(self):
+        source = (ROOT / 'operation-workflow/references/output-templates.md').read_text()
+        blocks = check.template_blocks(source)
+        review = filled(blocks['record'])
+        detail = filled(blocks['execution'])
+        fields = {
+            '用途与归属': '隔离试填的人工审阅入口，明细见[O01](execution.md#操作o01)；不代表真实服务器任务。',
+            '目标与验收': '测试服务demo_portal从1副本扩至2副本；期望与运行均为2，业务健康另行检查。',
+            '当前结论': '待执行；目前没有服务器变更。',
+            '异常与未验证': '运行副本数及业务均未验证，尚不能判断目标达成。',
+            '待办与决定': '请决定是否批准[S01/v1](#方案s01v1)；批准后方可执行O01。',
+            '前提与范围': '仅测试服务demo_portal，样例原副本数1；不改镜像和持久化数据。',
+            '变更与步骤': '副本数1→2；先核对原值，再按[O01](execution.md#操作o01)更新并检查运行数。',
+            '影响': '新增一个服务副本，增加资源占用；不修改其他服务。',
+            '备份与回退': '保留原副本数1；无数据文件变更。验证失败停止后续动作，仅在身份和基线符合时按O01所列恢复目标回退至1。',
+            '验证标准': 'O01需核对运行数2/2；业务健康未纳入本轮，不据此宣布业务验收。',
+            '人工决定': '待批准；只有[R01](execution.md#来源r01)需求，尚无批准来源。',
+            '结果与证据': '未执行，等待S01/v1整体批准；[O01](execution.md#操作o01)仅记录待执行范围和预期。',
+            '验收与剩余问题': '副本数未验证，业务未检查；先等待方案决定。',
+            '文档与提交范围': '仅本试填的record.md与execution.md；没有实际暂存或提交，不纳入真实项目。',
+        }
+        for field, value in fields.items():
+            review = review.replace(f'- {field}：样例1', f'- {field}：{value}')
+        review = review.replace('### 方案：样例1', '### 方案：S01/v1')
+        review = review.replace('| 样例1 | 样例1 | 样例1 | 样例1 |',
+                                '| [S01/v1](#方案s01v1) | 待批准 | 未执行 | [O01](execution.md#操作o01) |')
+        for item in ['结果确认', '归档批准', '索引检查', '本地提交', '推送']:
+            review = review.replace(f'| {item} | 样例1 | 样例1 |',
+                                    f'| {item} | 未执行：方案尚待批准 | 无：没有实际决定或执行证据 |')
+        fields = {
+            '用途与归属': '隔离试填明细，人工决定见[S01/v1](record.md#方案s01v1)，不连接真实服务器。',
+            '目标与身份': '模拟测试服务demo_portal；身份和提权仅为候选，执行前必须核实。',
+            '连接与核验': '未连接；本测试只验证文档结构，不产生连接授权。',
+            '策略依据': '模拟策略将候选命令判为allow，仅免逐条询问，整体变更仍待批准。',
+            '方案与授权': '[S01/v1](record.md#方案s01v1)待批准；[R01](#来源r01)仅为需求，不能执行。',
+            '命令与参数': '尚未执行，无实际命令；具体命令在执行当次生成并判定权限，执行后汇总。',
+            '执行结果': '未执行：整体方案尚待批准，无执行时点和退出码。',
+            '关键证据': '无：未执行，没有运行输出。',
+            '异常与后续': '批准及身份核验完成前保持未执行，不因命令allow直接变更。',
+            '来源与范围': '隔离模拟用户需求R01，仅提出扩容目标，不批准方案。',
+        }
+        for field, value in fields.items():
+            detail = detail.replace(f'- {field}：样例1', f'- {field}：{value}')
+        detail = detail.replace('### 操作：样例1', '### 操作：O01').replace('### 来源：样例1', '### 来源：R01')
+        detail = detail.replace('| 样例1 | 样例1 | 样例1 | 样例1 |',
+                                '| 副本数 | 更新后2/2，回退后1/1 | 未执行，无法判定 | 无：待整体批准后取证 |')
+        detail = detail.replace('```text\n样例1\n```', '```text\n隔离模拟需求：把测试服务从1副本扩至2副本。\n```')
+        for block, document in [('record', review), ('execution', detail)]:
+            with self.subTest(block=block):
+                self.assertNotIn('样例1', document)
+                self.assertNotIn('docker service update', document)
+                self.assertEqual([], check.validate(document, source, block))
+
+    def test_operation_failure_and_recovery_fit_existing_evidence_slots(self):
+        source = (ROOT / 'operation-workflow/references/output-templates.md').read_text()
+        blocks = check.template_blocks(source)
+        # Isolated syntax examples: no server commands are executed by this test.
+        for result, evidence, recovery, mount, health, restored in [
+            ('样例时点查询退出0；只读，无服务器变更。', '挂载读取返回RW=false；业务未检查。', '无变更，无需回退。',
+             '通过：RW=false', '未验证：本次未作健康检查', '不适用：只读无变更'),
+            ('样例时点实施退出0，随后验证退出1；部分完成。', '挂载RW=false；健康检查退出1。', '已停止后续动作；回退未执行，当前状态待核实。',
+             '通过：RW=false', '失败：健康检查退出1', '未知：回退未执行'),
+            ('样例时点实施退出1，获批回退退出0。', '回读恢复原配置；业务未验证。', '配置已恢复；业务验收仍未通过。',
+             '未知：中途失败，未完成挂载核验', '未验证：未作业务检查', '通过：配置回读与原基线一致'),
+        ]:
+            with self.subTest(result=result):
+                review = filled(blocks['record']).replace('- 当前结论：样例1', '- 当前结论：' + result)
+                review = review.replace('- 结果与证据：样例1', '- 结果与证据：' + recovery + ' 见execution.md对应操作。')
+                detail = filled(blocks['execution'])
+                detail = detail.replace('- 命令与参数：样例1', '- 命令与参数：隔离语法样例，不实际执行。\n\n  ```sh\n  docker service inspect demo_portal\n  ```')
+                detail = detail.replace('- 执行结果：样例1', '- 执行结果：' + result)
+                detail = detail.replace('- 关键证据：样例1', '- 关键证据：' + evidence)
+                detail = detail.replace('- 异常与后续：样例1', '- 异常与后续：' + recovery)
+                detail = detail.replace('| 样例1 | 样例1 | 样例1 | 样例1 |',
+                                        '| 挂载 | RW=false | ' + mount + ' | 见本操作关键证据 |\n'
+                                        '| 健康 | 健康检查通过 | ' + health + ' | 见本操作关键证据 |\n'
+                                        '| 恢复 | 回到变更前基线 | ' + restored + ' | 见本操作关键证据 |')
+                self.assertEqual([], check.validate(review, source, 'record'))
+                self.assertEqual([], check.validate(detail, source, 'execution'))
+                self.assertTrue(check.validate(detail.replace('- 异常与后续：' + recovery, ''), source, 'execution'))
 
     def test_formal_code_review_reports_have_an_authoritative_contract(self):
         source = (ROOT / 'code-review/references/report-template.md').read_text()
@@ -336,7 +826,11 @@ class FixedDocumentTests(unittest.TestCase):
                 self.assertTrue(check.validate(text, CONTRACT))
 
     def test_code_headings_do_not_change_document_structure(self):
-        text = GOOD.replace('## 验证覆盖', '```python\n# implementation note\n## not a document heading\n```\n\n## 验证覆盖')
+        outside = GOOD.replace('## 验证覆盖', '```python\n# implementation note\n## not a document heading\n```\n\n## 验证覆盖')
+        self.assertTrue(check.validate(outside, CONTRACT))
+        # Code is valid in the declared field, and its headings stay literal.
+        text = GOOD.replace('- 证据：模拟 fixture 的入口未调用授权检查。',
+                            '- 证据：模拟 fixture 的入口未调用授权检查。\n  ```python\n  # implementation note\n  ## not a document heading\n  ```')
         self.assertEqual([], check.validate(text, CONTRACT))
 
     def test_unclosed_code_fences_cannot_hide_trailing_content(self):
@@ -344,7 +838,10 @@ class FixedDocumentTests(unittest.TestCase):
         self.assertTrue(check.validate(broken, CONTRACT))
         broken_contract = '````document-template\n# 固定文档\n\n## 说明\n```text\n原文\n````'
         self.assertTrue(check.check_template(broken_contract))
-        nested = GOOD + '\n````text\n```python\n# 原始内容\n```\n````\n'
+        outside = GOOD + '\n````text\n```python\n# 原始内容\n```\n````\n'
+        self.assertTrue(check.validate(outside, CONTRACT))
+        nested = GOOD.replace('- 证据：模拟 fixture 的入口未调用授权检查。',
+                              '- 证据：模拟 fixture 的入口未调用授权检查。\n  ````text\n  ```python\n  # 原始内容\n  ```\n  ````')
         self.assertEqual([], check.validate(nested, CONTRACT))
 
     def test_design_fields_cannot_be_dropped_as_writing_instructions(self):
@@ -456,7 +953,7 @@ class FixedDocumentTests(unittest.TestCase):
         self.assertTrue(check.check_template(CONTRACT + '\n' + CONTRACT))
 
     def test_every_installed_template_is_consumable_and_rejects_new_sections(self):
-        count = 0
+        covered = set()
         for path in sorted(ROOT.glob('*/**/*.md')):
             if any(part.startswith('.') for part in path.relative_to(ROOT).parts):
                 continue
@@ -469,8 +966,20 @@ class FixedDocumentTests(unittest.TestCase):
                     text = filled(skeleton)
                     self.assertEqual([], check.validate(text, source, name), '\n'.join(check.validate(text, source, name)))
                     self.assertTrue(check.validate(text + '\n## 无授权新增章节\n额外内容\n', source, name))
-                    count += 1
-        self.assertGreaterEqual(count, 25)
+                    covered.add((path.relative_to(ROOT).as_posix(), name))
+        # Discover every template, but guard real consumers rather than an arbitrary
+        # total that would penalize retiring duplicate artifact contracts.
+        required_consumers = {
+            ('operation-workflow/references/output-templates.md', 'access'),
+            ('operation-workflow/references/output-templates.md', 'index'),
+            ('operation-workflow/references/output-templates.md', 'unit'),
+            ('operation-workflow/references/output-templates.md', 'record'),
+            ('operation-workflow/references/output-templates.md', 'execution'),
+            ('development-workflow/references/output-template.md', 'document'),
+            ('requirement-doc-authoring/references/requirement-template.md', 'document'),
+            ('skill-authoring-standard/references/skill-template.md', 'document'),
+        }
+        self.assertTrue(required_consumers <= covered, required_consumers - covered)
 
     def test_existing_document_preserves_original_structure(self):
         existing = '# 原文\n\n## 既有安排\n保留原文细节和确认状态。\n'

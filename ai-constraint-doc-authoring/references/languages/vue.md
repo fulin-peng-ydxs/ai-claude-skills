@@ -18,7 +18,7 @@
 
 - 环境：`node --version`
 - 包管理器：`npm --version`、`pnpm --version`、`yarn --version` 或 `bun --version`
-- 依赖：`npm ci`、`pnpm install --frozen-lockfile`、`yarn install --frozen-lockfile`，或仓库明确写出的安装命令。若安装会重写锁文件或访问私有源，先询问用户。
+- 依赖：`npm ci`、`pnpm install --frozen-lockfile`、`yarn install --frozen-lockfile`，或仓库明确写出的安装命令。若安装会重写锁文件或访问私有源，按 [验证门禁](../verification-gate.md#必备验证计划) 核对授权，未覆盖时再确认。
 - 测试：`test`、`test:unit` 或仓库文档指定的测试脚本。
 - 构建：`build` 脚本，通常是 `npm run build` 或等价命令。
 - 本地启动：优先使用根目录封装脚本；否则用 `dev` 脚本，并验证端口和清理方式。
